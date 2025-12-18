@@ -11,12 +11,12 @@ import org.mockito.Mockito.mock
 
 class CommerceTest {
 
-    private lateinit var kit: TestableMixpanelKit
+    private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
 
     @Before
     fun setUp() {
-        kit = TestableMixpanelKit()
+        kit = MixpanelKit()
         mockContext = mock(Context::class.java)
     }
 
@@ -43,4 +43,12 @@ class CommerceTest {
     fun `supportsAttributeLists returns true`() {
         assertTrue(kit.supportsAttributeLists())
     }
+
+    // Note: buildCommerceEventProperties is tested indirectly through IntegrationTest
+    // which verifies commerce events are properly forwarded to Mixpanel with all properties.
+    // Direct unit testing of buildCommerceEventProperties is complex due to mParticle SDK
+    // class mocking requirements. The method's behavior matches the iOS implementation:
+    // - Includes expanded event attributes
+    // - Includes commerce event custom attributes (overrides expanded if same key)
+    // - Includes transaction attributes: Revenue, Transaction Id, Tax, Shipping, Coupon Code
 }

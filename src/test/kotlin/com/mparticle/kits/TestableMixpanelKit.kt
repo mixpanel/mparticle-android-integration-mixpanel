@@ -4,8 +4,6 @@ import android.content.Context
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.mparticle.MPEvent
 import com.mparticle.commerce.CommerceEvent
-import com.mparticle.commerce.Product
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -117,16 +115,18 @@ class TestableMixpanelKit : MixpanelKit() {
         if (!isStarted) return null
         val mixpanel = instance as? MixpanelAPI ?: return null
 
-        if (event.productAction == Product.PURCHASE) {
-            val revenue = event.transactionAttributes?.revenue ?: 0.0
-            mixpanel.people.trackCharge(revenue, convertToJSONObject(event.customAttributeStrings))
-            return emptyList()
+        // Expand all commerce events (including purchases) to regular events
+        // Note: trackCharge is deprecated by Mixpanel
+        val expandedEvents = CommerceEventUtils.expand(event)
+
+        expandedEvents?.forEach { expandedEvent ->
+            val eventName = expandedEvent.eventName
+            if (!eventName.isNullOrEmpty()) {
+                val properties = buildCommerceEventProperties(expandedEvent, event)
+                mixpanel.track(eventName, properties)
+            }
         }
 
-        // For non-purchase events, expand to regular events
-        CommerceEventUtils.expand(event)?.forEach { expandedEvent ->
-            logEvent(expandedEvent)
-        }
         return emptyList()
     }
 

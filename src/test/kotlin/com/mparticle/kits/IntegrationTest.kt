@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.any
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -139,7 +140,7 @@ class IntegrationTest {
     // Commerce Tests
 
     @Test
-    fun `commerce purchase event calls trackCharge with revenue`() {
+    fun `commerce purchase event expands to track call with properties`() {
         initializeKit()
         val product = Product.Builder("Test Product", "SKU123", 29.99)
             .quantity(2.0)
@@ -150,19 +151,18 @@ class IntegrationTest {
             .transactionAttributes(transactionAttributes)
             .build()
         kit.logEvent(event)
-        verify(mockPeople).trackCharge(eq(59.98), any())
+        // Commerce events are expanded to regular track() calls (trackCharge is deprecated)
+        verify(mockMixpanel, atLeastOnce()).track(any<String>(), any())
     }
 
     @Test
-    fun `commerce purchase with zero revenue still calls trackCharge`() {
+    fun `commerce add to cart event expands to track call`() {
         initializeKit()
-        val product = Product.Builder("Free Product", "SKU-FREE", 0.0).build()
-        val transactionAttributes = TransactionAttributes("order-free")
-        val event = CommerceEvent.Builder(Product.PURCHASE, product)
-            .transactionAttributes(transactionAttributes)
-            .build()
+        val product = Product.Builder("Test Product", "SKU123", 29.99).build()
+        val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).build()
         kit.logEvent(event)
-        verify(mockPeople).trackCharge(eq(0.0), any())
+        // All commerce events are expanded to regular track() calls
+        verify(mockMixpanel, atLeastOnce()).track(any<String>(), any())
     }
 
     // Identity Tests

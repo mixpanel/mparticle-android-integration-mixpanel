@@ -188,20 +188,53 @@ open class MixpanelKit : KitIntegration(),
         if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
-        if (event.productAction == Product.PURCHASE) {
-            if (useMixpanelPeople) {
-                val revenue = event.transactionAttributes?.revenue ?: 0.0
-                mixpanel.people.trackCharge(revenue, convertToJSONObject(event.customAttributeStrings))
+        // Expand all commerce events (including purchases) to regular events
+        // Note: trackCharge is deprecated by Mixpanel - commerce events should be tracked as regular events
+        val messages = mutableListOf<ReportingMessage>()
+        val expandedEvents = CommerceEventUtils.expand(event)
+
+        expandedEvents?.forEach { expandedEvent ->
+            val eventName = expandedEvent.eventName
+            if (!eventName.isNullOrEmpty()) {
+                val properties = buildCommerceEventProperties(expandedEvent, event)
+                mixpanel.track(eventName, properties)
+                messages.add(ReportingMessage.fromEvent(this, expandedEvent))
             }
-            return listOf(ReportingMessage.fromEvent(this, event))
         }
 
-        // For non-purchase events, expand to regular events
-        val messages = mutableListOf<ReportingMessage>()
-        CommerceEventUtils.expand(event)?.forEach { expandedEvent ->
-            logEvent(expandedEvent)?.let { messages.addAll(it) }
-        }
         return messages.ifEmpty { null }
+    }
+
+    /**
+     * Builds Mixpanel properties from expanded commerce event and original commerce event.
+     * Combines: expanded event attributes, commerce event custom attributes, and transaction attributes.
+     */
+    internal fun buildCommerceEventProperties(
+        expandedEvent: MPEvent,
+        commerceEvent: CommerceEvent
+    ): JSONObject {
+        val properties = JSONObject()
+
+        // Add expanded event's custom attributes (contains product info)
+        expandedEvent.customAttributeStrings?.forEach { (key, value) ->
+            properties.put(key, value)
+        }
+
+        // Add commerce event's custom attributes
+        commerceEvent.customAttributeStrings?.forEach { (key, value) ->
+            properties.put(key, value)
+        }
+
+        // Add transaction attributes
+        commerceEvent.transactionAttributes?.let { txnAttrs ->
+            txnAttrs.revenue?.let { properties.put("Revenue", it) }
+            txnAttrs.id?.let { properties.put("Transaction Id", it) }
+            txnAttrs.tax?.let { properties.put("Tax", it) }
+            txnAttrs.shipping?.let { properties.put("Shipping", it) }
+            txnAttrs.couponCode?.let { properties.put("Coupon Code", it) }
+        }
+
+        return properties
     }
 
     override fun logLtvIncrease(
