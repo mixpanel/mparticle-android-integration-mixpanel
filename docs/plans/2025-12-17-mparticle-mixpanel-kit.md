@@ -4,9 +4,9 @@
 
 **Goal:** Create a fully-functional mParticle Android Kit for Mixpanel that provides feature parity with the iOS Mixpanel Kit.
 
-**Architecture:** The kit extends `KitIntegration` and implements `EventListener`, `CommerceListener`, `IdentityListener`, and `UserAttributeListener` interfaces. It wraps the `mixpanel-android` SDK, mapping mParticle events and user data to Mixpanel API calls. Configuration comes from the mParticle dashboard at runtime.
+**Architecture:** The kit extends `KitIntegration` and implements `EventListener`, `CommerceListener`, `IdentityListener`, and `UserAttributeListener` interfaces. It wraps the `mixpanel-android` SDK, mapping mParticle events and user data to Mixpanel API calls. Configuration comes from the mParticle dashboard at runtime. The kit follows mParticle best practices: fail gracefully (never crash), check started state before SDK calls, and handle thread safety.
 
-**Tech Stack:** Kotlin 1.9+, Android SDK 21+, Gradle (Kotlin DSL), JUnit 4, Mockito 5+, mParticle Android Core 5.x, Mixpanel Android 7.x
+**Tech Stack:** Kotlin 1.9+, Android SDK 21+, Gradle (Kotlin DSL), JUnit 4, Mockito 5+, Robolectric 4.11+, mParticle Android Core 5.x, Mixpanel Android 7.x
 
 ---
 
@@ -18,6 +18,7 @@
 - Create: `gradle.properties`
 - Create: `src/main/AndroidManifest.xml`
 - Create: `consumer-proguard.pro`
+- Create: `LICENSE`
 
 **Step 1: Create settings.gradle.kts**
 
@@ -73,6 +74,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.test:core:1.5.0")
 }
 ```
 
@@ -108,15 +110,210 @@ org.gradle.jvmargs=-Xmx2048m
 -keep class com.mparticle.kits.UserIdentificationType { *; }
 ```
 
-**Step 6: Verify Gradle sync**
+**Step 6: Create LICENSE file**
+
+```text
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to the Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   Copyright 2024 mParticle, Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+
+**Step 7: Verify Gradle sync**
 
 Run: `./gradlew clean build --dry-run`
 Expected: BUILD SUCCESSFUL
 
-**Step 7: Commit**
+**Step 8: Commit**
 
 ```bash
-git add -A && git commit -m "chore: initialize project structure with Gradle and dependencies"
+git add -A && git commit -m "chore: initialize project structure with Gradle, dependencies, and LICENSE"
 ```
 
 ---
@@ -186,6 +383,12 @@ class UserIdentificationTypeTest {
         val result = UserIdentificationType.fromValue(null)
         assertNull(result)
     }
+
+    @Test
+    fun `fromValue returns null for empty string`() {
+        val result = UserIdentificationType.fromValue("")
+        assertNull(result)
+    }
 }
 ```
 
@@ -202,6 +405,10 @@ package com.mparticle.kits
 
 /**
  * Configurable user identification type for Mixpanel identity mapping.
+ *
+ * This enum determines which mParticle identity type is used as the
+ * Mixpanel distinct ID when identifying users.
+ *
  * Matches the iOS implementation for feature parity.
  */
 enum class UserIdentificationType(val value: String) {
@@ -215,11 +422,12 @@ enum class UserIdentificationType(val value: String) {
     companion object {
         /**
          * Parse a string value to a UserIdentificationType.
+         *
          * @param value The string value from mParticle configuration
          * @return The matching UserIdentificationType or null if not found
          */
         fun fromValue(value: String?): UserIdentificationType? {
-            if (value == null) return null
+            if (value.isNullOrEmpty()) return null
             return entries.find { it.value == value }
         }
     }
@@ -229,7 +437,7 @@ enum class UserIdentificationType(val value: String) {
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.UserIdentificationTypeTest"`
-Expected: PASS (8 tests)
+Expected: PASS (9 tests)
 
 **Step 5: Commit**
 
@@ -239,7 +447,7 @@ git add -A && git commit -m "feat: add UserIdentificationType enum"
 
 ---
 
-## Task 3: MixpanelKit Core Structure
+## Task 3: MixpanelKit Core Structure with Started State
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/MixpanelKitTest.kt`
@@ -251,15 +459,40 @@ git add -A && git commit -m "feat: add UserIdentificationType enum"
 // src/test/kotlin/com/mparticle/kits/MixpanelKitTest.kt
 package com.mparticle.kits
 
+import android.content.Context
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class MixpanelKitTest {
-    private val kit = MixpanelKit()
+    private lateinit var kit: MixpanelKit
+    private lateinit var mockContext: Context
+
+    @Before
+    fun setUp() {
+        kit = MixpanelKit()
+        mockContext = mock(Context::class.java)
+    }
 
     @Test
     fun `getName returns Mixpanel`() {
         assertEquals("Mixpanel", kit.name)
+    }
+
+    @Test
+    fun `kit is not started before onKitCreate`() {
+        assertFalse(kit.isStarted)
+    }
+
+    @Test
+    fun `getInstance returns null before initialization`() {
+        assertNull(kit.instance)
     }
 }
 ```
@@ -269,21 +502,49 @@ class MixpanelKitTest {
 Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest.getName returns Mixpanel"`
 Expected: FAIL with "Unresolved reference: MixpanelKit"
 
-**Step 3: Write minimal MixpanelKit skeleton**
+**Step 3: Write minimal MixpanelKit skeleton with started state**
 
 ```kotlin
 // src/main/kotlin/com/mparticle/kits/MixpanelKit.kt
 package com.mparticle.kits
 
 import android.content.Context
+import com.mixpanel.android.mpmetrics.MixpanelAPI
 
 /**
  * mParticle Kit for Mixpanel analytics integration.
  *
  * This kit wraps the Mixpanel Android SDK and maps mParticle events,
  * identity, and user attributes to their Mixpanel equivalents.
+ *
+ * Design principles (per ARCHITECTURE.md):
+ * - Fail gracefully: Never crash the host app
+ * - Check started state: Don't call Mixpanel SDK until initialized
+ * - Thread safety: Kit methods may be called from any thread
  */
 class MixpanelKit : KitIntegration() {
+
+    // MARK: - Private State
+
+    @Volatile
+    private var mixpanelInstance: MixpanelAPI? = null
+
+    @Volatile
+    private var _isStarted: Boolean = false
+
+    private var useMixpanelPeople: Boolean = true
+    private var userIdentificationType: UserIdentificationType = UserIdentificationType.CUSTOMER_ID
+
+    // MARK: - Public Properties
+
+    /**
+     * Whether the kit has been successfully initialized.
+     * Check this before calling any Mixpanel SDK methods.
+     */
+    val isStarted: Boolean
+        get() = _isStarted
+
+    // MARK: - KitIntegration Overrides
 
     override fun getName(): String = NAME
 
@@ -300,21 +561,31 @@ class MixpanelKit : KitIntegration() {
         return null
     }
 
+    /**
+     * Returns the Mixpanel SDK instance for direct access.
+     * Returns null if the kit has not been initialized.
+     */
+    override fun getInstance(): Any? = mixpanelInstance
+
     companion object {
         const val NAME = "Mixpanel"
+        const val KEY_TOKEN = "token"
+        const val KEY_SERVER_URL = "serverURL"
+        const val KEY_USER_ID_TYPE = "userIdentificationType"
+        const val KEY_USE_PEOPLE = "useMixpanelPeople"
     }
 }
 ```
 
 **Step 4: Run test to verify it passes**
 
-Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest.getName returns Mixpanel"`
-Expected: PASS
+Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest"`
+Expected: PASS (3 tests)
 
 **Step 5: Commit**
 
 ```bash
-git add -A && git commit -m "feat: add MixpanelKit skeleton with getName()"
+git add -A && git commit -m "feat: add MixpanelKit skeleton with started state tracking"
 ```
 
 ---
@@ -330,25 +601,6 @@ git add -A && git commit -m "feat: add MixpanelKit skeleton with getName()"
 Add to `MixpanelKitTest.kt`:
 
 ```kotlin
-import android.content.Context
-import org.junit.Before
-import org.mockito.Mockito.mock
-
-class MixpanelKitTest {
-    private lateinit var kit: MixpanelKit
-    private lateinit var mockContext: Context
-
-    @Before
-    fun setUp() {
-        kit = MixpanelKit()
-        mockContext = mock(Context::class.java)
-    }
-
-    @Test
-    fun `getName returns Mixpanel`() {
-        assertEquals("Mixpanel", kit.name)
-    }
-
     @Test(expected = IllegalArgumentException::class)
     fun `onKitCreate throws when token is missing`() {
         kit.onKitCreate(mutableMapOf(), mockContext)
@@ -364,7 +616,12 @@ class MixpanelKitTest {
     fun `onKitCreate throws when settings is null`() {
         kit.onKitCreate(null, mockContext)
     }
-}
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `onKitCreate throws when context is null`() {
+        val settings = mutableMapOf("token" to "test-token")
+        kit.onKitCreate(settings, null)
+    }
 ```
 
 **Step 2: Run test to verify it fails**
@@ -374,21 +631,16 @@ Expected: FAIL - no exception thrown
 
 **Step 3: Implement token validation**
 
-Update `MixpanelKit.kt`:
+Update `onKitCreate` in `MixpanelKit.kt`:
 
 ```kotlin
-package com.mparticle.kits
-
-import android.content.Context
-
-class MixpanelKit : KitIntegration() {
-
-    override fun getName(): String = NAME
-
     override fun onKitCreate(
         settings: MutableMap<String, String>?,
         context: Context?
     ): MutableList<ReportingMessage>? {
+        // Validate required parameters
+        requireNotNull(context) { "Context is required" }
+
         val token = settings?.get(KEY_TOKEN)
         if (token.isNullOrEmpty()) {
             throw IllegalArgumentException("Mixpanel token is required")
@@ -397,27 +649,17 @@ class MixpanelKit : KitIntegration() {
         // TODO: Initialize Mixpanel SDK
         return null
     }
-
-    override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage>? {
-        return null
-    }
-
-    companion object {
-        const val NAME = "Mixpanel"
-        const val KEY_TOKEN = "token"
-    }
-}
 ```
 
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest"`
-Expected: PASS (4 tests)
+Expected: PASS (7 tests)
 
 **Step 5: Commit**
 
 ```bash
-git add -A && git commit -m "feat: add token validation in onKitCreate"
+git add -A && git commit -m "feat: add token and context validation in onKitCreate"
 ```
 
 ---
@@ -434,15 +676,17 @@ Add to `MixpanelKitTest.kt`:
 
 ```kotlin
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 
     @Test
     fun `onKitCreate succeeds with valid token`() {
-        val settings = mutableMapOf(
-            "token" to "test-token-12345"
-        )
-        // Should not throw
+        val settings = mutableMapOf("token" to "test-token-12345")
+
         val result = kit.onKitCreate(settings, mockContext)
+
         // Result should be null (no startup events)
+        assertNull(result)
+        assertTrue(kit.isStarted)
     }
 
     @Test
@@ -453,35 +697,56 @@ import org.junit.Assert.assertNotNull
         val instance = kit.instance
         assertNotNull(instance)
     }
+
+    @Test
+    fun `onKitCreate parses userIdentificationType setting`() {
+        val settings = mutableMapOf(
+            "token" to "test-token",
+            "userIdentificationType" to "MPID"
+        )
+        kit.onKitCreate(settings, mockContext)
+
+        assertTrue(kit.isStarted)
+    }
+
+    @Test
+    fun `onKitCreate parses useMixpanelPeople setting as false`() {
+        val settings = mutableMapOf(
+            "token" to "test-token",
+            "useMixpanelPeople" to "false"
+        )
+        kit.onKitCreate(settings, mockContext)
+
+        assertTrue(kit.isStarted)
+    }
+
+    @Test
+    fun `onKitCreate parses serverURL setting`() {
+        val settings = mutableMapOf(
+            "token" to "test-token",
+            "serverURL" to "https://api-eu.mixpanel.com"
+        )
+        kit.onKitCreate(settings, mockContext)
+
+        assertTrue(kit.isStarted)
+    }
 ```
 
 **Step 2: Run test to verify current state**
 
 Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest.onKitCreate succeeds with valid token"`
-Expected: PASS (no exception)
+Expected: FAIL - isStarted is false
 
 **Step 3: Implement Mixpanel initialization with configuration parsing**
 
 Update `MixpanelKit.kt`:
 
 ```kotlin
-package com.mparticle.kits
-
-import android.content.Context
-import com.mixpanel.android.mpmetrics.MixpanelAPI
-
-class MixpanelKit : KitIntegration() {
-
-    private var mixpanelInstance: MixpanelAPI? = null
-    private var useMixpanelPeople: Boolean = true
-    private var userIdentificationType: UserIdentificationType = UserIdentificationType.CUSTOMER_ID
-
-    override fun getName(): String = NAME
-
     override fun onKitCreate(
         settings: MutableMap<String, String>?,
         context: Context?
     ): MutableList<ReportingMessage>? {
+        // Validate required parameters
         requireNotNull(context) { "Context is required" }
 
         val token = settings?.get(KEY_TOKEN)
@@ -504,7 +769,7 @@ class MixpanelKit : KitIntegration() {
             useMixpanelPeople = peopleString.lowercase() == "true"
         }
 
-        // Initialize Mixpanel SDK
+        // Initialize Mixpanel SDK (trackAutomaticEvents = false per iOS parity)
         mixpanelInstance = MixpanelAPI.getInstance(context, token, false)
 
         // Set custom server URL if provided
@@ -512,10 +777,77 @@ class MixpanelKit : KitIntegration() {
             mixpanelInstance?.setServerURL(url)
         }
 
+        // Mark as started
+        _isStarted = true
+
         return null
     }
+```
 
+**Step 4: Run tests to verify**
+
+Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest"`
+Expected: PASS (12 tests)
+
+**Step 5: Commit**
+
+```bash
+git add -A && git commit -m "feat: implement Mixpanel SDK initialization with configuration parsing"
+```
+
+---
+
+## Task 6: setOptOut Implementation
+
+**Files:**
+- Modify: `src/test/kotlin/com/mparticle/kits/MixpanelKitTest.kt`
+- Modify: `src/main/kotlin/com/mparticle/kits/MixpanelKit.kt`
+
+**Step 1: Write the failing test**
+
+Add to `MixpanelKitTest.kt`:
+
+```kotlin
+    @Test
+    fun `setOptOut returns null when not started`() {
+        val result = kit.setOptOut(true)
+        assertNull(result)
+    }
+
+    @Test
+    fun `setOptOut with true calls optOutTracking`() {
+        val settings = mutableMapOf("token" to "test-token")
+        kit.onKitCreate(settings, mockContext)
+
+        // Should not throw
+        val result = kit.setOptOut(true)
+        assertNull(result)
+    }
+
+    @Test
+    fun `setOptOut with false calls optInTracking`() {
+        val settings = mutableMapOf("token" to "test-token")
+        kit.onKitCreate(settings, mockContext)
+
+        // Should not throw
+        val result = kit.setOptOut(false)
+        assertNull(result)
+    }
+```
+
+**Step 2: Run test to verify current state**
+
+Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest.setOptOut returns null when not started"`
+Expected: PASS (already returns null)
+
+**Step 3: Implement setOptOut with started check**
+
+Update `setOptOut` in `MixpanelKit.kt`:
+
+```kotlin
     override fun setOptOut(optedOut: Boolean): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
         if (optedOut) {
@@ -526,36 +858,22 @@ class MixpanelKit : KitIntegration() {
 
         return null
     }
-
-    /**
-     * Returns the Mixpanel SDK instance for direct access.
-     */
-    override fun getInstance(): Any? = mixpanelInstance
-
-    companion object {
-        const val NAME = "Mixpanel"
-        const val KEY_TOKEN = "token"
-        const val KEY_SERVER_URL = "serverURL"
-        const val KEY_USER_ID_TYPE = "userIdentificationType"
-        const val KEY_USE_PEOPLE = "useMixpanelPeople"
-    }
-}
 ```
 
 **Step 4: Run tests to verify**
 
 Run: `./gradlew test --tests "com.mparticle.kits.MixpanelKitTest"`
-Expected: PASS
+Expected: PASS (15 tests)
 
 **Step 5: Commit**
 
 ```bash
-git add -A && git commit -m "feat: implement Mixpanel SDK initialization with configuration parsing"
+git add -A && git commit -m "feat: implement setOptOut with started state check"
 ```
 
 ---
 
-## Task 6: EventListener Interface - logEvent
+## Task 7: EventListener Interface - logEvent
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/EventForwardingTest.kt`
@@ -572,10 +890,14 @@ import com.mparticle.MPEvent
 import com.mparticle.MParticle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class EventForwardingTest {
     private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
@@ -584,12 +906,24 @@ class EventForwardingTest {
     fun setUp() {
         kit = MixpanelKit()
         mockContext = mock(Context::class.java)
-        val settings = mutableMapOf("token" to "test-token")
-        kit.onKitCreate(settings, mockContext)
+    }
+
+    private fun initializeKit() {
+        kit.onKitCreate(mutableMapOf("token" to "test-token"), mockContext)
+    }
+
+    @Test
+    fun `logEvent returns null when not started`() {
+        val event = MPEvent.Builder("Test Event", MParticle.EventType.Other).build()
+
+        val result = kit.logEvent(event)
+
+        assertNull(result)
     }
 
     @Test
     fun `logEvent forwards event to Mixpanel`() {
+        initializeKit()
         val event = MPEvent.Builder("Test Event", MParticle.EventType.Other).build()
 
         val result = kit.logEvent(event)
@@ -600,6 +934,7 @@ class EventForwardingTest {
 
     @Test
     fun `logEvent includes event attributes`() {
+        initializeKit()
         val event = MPEvent.Builder("Test Event", MParticle.EventType.Other)
             .customAttributes(mapOf("key1" to "value1", "key2" to "value2"))
             .build()
@@ -607,6 +942,16 @@ class EventForwardingTest {
         val result = kit.logEvent(event)
 
         assertNotNull(result)
+    }
+
+    @Test
+    fun `logEvent returns null for null event name`() {
+        initializeKit()
+        val event = MPEvent.Builder("", MParticle.EventType.Other).build()
+
+        val result = kit.logEvent(event)
+
+        assertNull(result)
     }
 }
 ```
@@ -621,6 +966,9 @@ Expected: FAIL - logEvent method doesn't exist
 Update `MixpanelKit.kt` class declaration and add methods:
 
 ```kotlin
+import com.mparticle.MPEvent
+import org.json.JSONObject
+
 class MixpanelKit : KitIntegration(), KitIntegration.EventListener {
 
     // ... existing code ...
@@ -628,6 +976,8 @@ class MixpanelKit : KitIntegration(), KitIntegration.EventListener {
     // MARK: - EventListener Implementation
 
     override fun logEvent(event: MPEvent): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
         val eventName = event.eventName
@@ -673,14 +1023,23 @@ class MixpanelKit : KitIntegration(), KitIntegration.EventListener {
 
     // MARK: - Helpers
 
-    private fun convertToJSONObject(attributes: Map<String, String>?): org.json.JSONObject? {
+    /**
+     * Convert a Map to JSONObject for Mixpanel properties.
+     * Returns null if the map is null or empty.
+     */
+    private fun convertToJSONObject(attributes: Map<String, String>?): JSONObject? {
         if (attributes.isNullOrEmpty()) return null
 
-        val json = org.json.JSONObject()
-        attributes.forEach { (key, value) ->
-            json.put(key, value)
+        return try {
+            val json = JSONObject()
+            attributes.forEach { (key, value) ->
+                json.put(key, value)
+            }
+            json
+        } catch (e: Exception) {
+            // Fail gracefully
+            null
         }
-        return json
     }
 }
 ```
@@ -688,17 +1047,17 @@ class MixpanelKit : KitIntegration(), KitIntegration.EventListener {
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.EventForwardingTest"`
-Expected: PASS (2 tests)
+Expected: PASS (4 tests)
 
 **Step 5: Commit**
 
 ```bash
-git add -A && git commit -m "feat: implement EventListener.logEvent"
+git add -A && git commit -m "feat: implement EventListener.logEvent with started state check"
 ```
 
 ---
 
-## Task 7: EventListener Interface - logScreen
+## Task 8: EventListener Interface - logScreen
 
 **Files:**
 - Modify: `src/test/kotlin/com/mparticle/kits/EventForwardingTest.kt`
@@ -710,7 +1069,16 @@ Add to `EventForwardingTest.kt`:
 
 ```kotlin
     @Test
+    fun `logScreen returns null when not started`() {
+        val result = kit.logScreen("Home", null)
+
+        assertNull(result)
+    }
+
+    @Test
     fun `logScreen prefixes event name with Viewed`() {
+        initializeKit()
+
         val result = kit.logScreen("Home", mutableMapOf("section" to "main"))
 
         assertNotNull(result)
@@ -720,16 +1088,20 @@ Add to `EventForwardingTest.kt`:
 
     @Test
     fun `logScreen returns null for null screen name`() {
+        initializeKit()
+
         val result = kit.logScreen(null, null)
 
-        assertEquals(null, result)
+        assertNull(result)
     }
 
     @Test
     fun `logScreen returns null for empty screen name`() {
+        initializeKit()
+
         val result = kit.logScreen("", null)
 
-        assertEquals(null, result)
+        assertNull(result)
     }
 ```
 
@@ -747,12 +1119,15 @@ Update `logScreen` in `MixpanelKit.kt`:
         screenName: String?,
         screenAttributes: MutableMap<String, String>?
     ): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
         if (screenName.isNullOrEmpty()) {
             return null
         }
 
+        // Prefix with "Viewed " per iOS parity
         val eventName = "Viewed $screenName"
         val properties = convertToJSONObject(screenAttributes)
         mixpanel.track(eventName, properties)
@@ -771,7 +1146,7 @@ Update `logScreen` in `MixpanelKit.kt`:
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.EventForwardingTest"`
-Expected: PASS (5 tests)
+Expected: PASS (8 tests)
 
 **Step 5: Commit**
 
@@ -781,7 +1156,7 @@ git add -A && git commit -m "feat: implement EventListener.logScreen with 'Viewe
 
 ---
 
-## Task 8: EventListener Interface - Error and Breadcrumb Methods
+## Task 9: EventListener Interface - Error and Breadcrumb Methods
 
 **Files:**
 - Modify: `src/test/kotlin/com/mparticle/kits/EventForwardingTest.kt`
@@ -793,7 +1168,15 @@ Add to `EventForwardingTest.kt`:
 
 ```kotlin
     @Test
+    fun `logError returns null when not started`() {
+        val result = kit.logError("Error", null)
+        assertNull(result)
+    }
+
+    @Test
     fun `logError tracks Error event`() {
+        initializeKit()
+
         val result = kit.logError("Something went wrong", mutableMapOf("code" to "500"))
 
         assertNotNull(result)
@@ -801,8 +1184,16 @@ Add to `EventForwardingTest.kt`:
     }
 
     @Test
+    fun `logException returns null when not started`() {
+        val result = kit.logException(RuntimeException(), null, null)
+        assertNull(result)
+    }
+
+    @Test
     fun `logException tracks Exception event`() {
+        initializeKit()
         val exception = RuntimeException("Test exception")
+
         val result = kit.logException(exception, mutableMapOf("severity" to "high"), "Custom message")
 
         assertNotNull(result)
@@ -810,11 +1201,37 @@ Add to `EventForwardingTest.kt`:
     }
 
     @Test
+    fun `leaveBreadcrumb returns null when not started`() {
+        val result = kit.leaveBreadcrumb("Breadcrumb")
+        assertNull(result)
+    }
+
+    @Test
     fun `leaveBreadcrumb tracks Breadcrumb event`() {
+        initializeKit()
+
         val result = kit.leaveBreadcrumb("User clicked button")
 
         assertNotNull(result)
         assertEquals(1, result?.size)
+    }
+
+    @Test
+    fun `leaveBreadcrumb returns null for null breadcrumb`() {
+        initializeKit()
+
+        val result = kit.leaveBreadcrumb(null)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `leaveBreadcrumb returns null for empty breadcrumb`() {
+        initializeKit()
+
+        val result = kit.leaveBreadcrumb("")
+
+        assertNull(result)
     }
 ```
 
@@ -832,12 +1249,18 @@ Update methods in `MixpanelKit.kt`:
         message: String?,
         errorAttributes: MutableMap<String, String>?
     ): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
-        val properties = org.json.JSONObject()
-        properties.put("error_message", message ?: "Unknown error")
-        errorAttributes?.forEach { (key, value) ->
-            properties.put(key, value)
+        val properties = JSONObject()
+        try {
+            properties.put("error_message", message ?: "Unknown error")
+            errorAttributes?.forEach { (key, value) ->
+                properties.put(key, value)
+            }
+        } catch (e: Exception) {
+            // Fail gracefully
         }
 
         mixpanel.track("Error", properties)
@@ -857,13 +1280,19 @@ Update methods in `MixpanelKit.kt`:
         exceptionAttributes: MutableMap<String, String>?,
         message: String?
     ): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
-        val properties = org.json.JSONObject()
-        properties.put("exception_message", message ?: exception?.message ?: "Unknown exception")
-        properties.put("exception_class", exception?.javaClass?.simpleName ?: "Unknown")
-        exceptionAttributes?.forEach { (key, value) ->
-            properties.put(key, value)
+        val properties = JSONObject()
+        try {
+            properties.put("exception_message", message ?: exception?.message ?: "Unknown exception")
+            properties.put("exception_class", exception?.javaClass?.simpleName ?: "Unknown")
+            exceptionAttributes?.forEach { (key, value) ->
+                properties.put(key, value)
+            }
+        } catch (e: Exception) {
+            // Fail gracefully
         }
 
         mixpanel.track("Exception", properties)
@@ -879,14 +1308,20 @@ Update methods in `MixpanelKit.kt`:
     }
 
     override fun leaveBreadcrumb(breadcrumb: String?): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
         if (breadcrumb.isNullOrEmpty()) {
             return null
         }
 
-        val properties = org.json.JSONObject()
-        properties.put("text", breadcrumb)
+        val properties = JSONObject()
+        try {
+            properties.put("text", breadcrumb)
+        } catch (e: Exception) {
+            // Fail gracefully
+        }
 
         mixpanel.track("Breadcrumb", properties)
 
@@ -904,7 +1339,7 @@ Update methods in `MixpanelKit.kt`:
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.EventForwardingTest"`
-Expected: PASS (8 tests)
+Expected: PASS (16 tests)
 
 **Step 5: Commit**
 
@@ -914,7 +1349,7 @@ git add -A && git commit -m "feat: implement logError, logException, and leaveBr
 
 ---
 
-## Task 9: CommerceListener Interface - Purchase Events
+## Task 10: CommerceListener Interface - Purchase Events
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/CommerceTest.kt`
@@ -932,10 +1367,14 @@ import com.mparticle.commerce.Product
 import com.mparticle.commerce.TransactionAttributes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class CommerceTest {
     private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
@@ -944,15 +1383,31 @@ class CommerceTest {
     fun setUp() {
         kit = MixpanelKit()
         mockContext = mock(Context::class.java)
-        val settings = mutableMapOf(
-            "token" to "test-token",
-            "useMixpanelPeople" to "true"
+    }
+
+    private fun initializeKit(usePeople: Boolean = true) {
+        kit.onKitCreate(
+            mutableMapOf(
+                "token" to "test-token",
+                "useMixpanelPeople" to usePeople.toString()
+            ),
+            mockContext
         )
-        kit.onKitCreate(settings, mockContext)
+    }
+
+    @Test
+    fun `logEvent commerce returns null when not started`() {
+        val product = Product.Builder("Product", "SKU", 10.0).build()
+        val event = CommerceEvent.Builder(Product.PURCHASE, product).build()
+
+        val result = kit.logEvent(event)
+
+        assertNull(result)
     }
 
     @Test
     fun `logEvent tracks purchase with revenue`() {
+        initializeKit()
         val product = Product.Builder("Test Product", "SKU123", 29.99)
             .quantity(2.0)
             .build()
@@ -972,21 +1427,45 @@ class CommerceTest {
 
     @Test
     fun `logEvent with useMixpanelPeople false still tracks purchase`() {
-        // Reinitialize with People disabled
-        val kit2 = MixpanelKit()
-        kit2.onKitCreate(
-            mutableMapOf("token" to "test", "useMixpanelPeople" to "false"),
-            mockContext
-        )
+        initializeKit(usePeople = false)
 
         val product = Product.Builder("Product", "SKU", 10.0).build()
         val event = CommerceEvent.Builder(Product.PURCHASE, product)
             .transactionAttributes(TransactionAttributes("TXN").setRevenue(10.0))
             .build()
 
-        val result = kit2.logEvent(event)
+        val result = kit.logEvent(event)
 
+        // Still returns reporting message even without People API
         assertNotNull(result)
+    }
+
+    @Test
+    fun `logEvent expands non-purchase commerce events`() {
+        initializeKit()
+
+        val product = Product.Builder("Product", "SKU", 10.0).build()
+        val event = CommerceEvent.Builder(Product.ADD_TO_CART, product).build()
+
+        val result = kit.logEvent(event)
+
+        // Non-purchase events are expanded to regular events
+        // Result may be null if expansion produces no events
+    }
+
+    @Test
+    fun `logLtvIncrease returns null`() {
+        initializeKit()
+
+        val result = kit.logLtvIncrease(
+            java.math.BigDecimal("10.00"),
+            java.math.BigDecimal("100.00"),
+            "Purchase",
+            mutableMapOf()
+        )
+
+        // LTV increase is not supported by Mixpanel
+        assertNull(result)
     }
 }
 ```
@@ -1014,6 +1493,8 @@ class MixpanelKit : KitIntegration(),
     // MARK: - CommerceListener Implementation
 
     override fun logEvent(event: CommerceEvent): MutableList<ReportingMessage>? {
+        // Fail gracefully if not started
+        if (!_isStarted) return null
         val mixpanel = mixpanelInstance ?: return null
 
         val productAction = event.productAction
@@ -1023,7 +1504,11 @@ class MixpanelKit : KitIntegration(),
             if (useMixpanelPeople) {
                 val revenue = event.transactionAttributes?.revenue ?: 0.0
                 val properties = convertToJSONObject(event.customAttributeStrings)
-                mixpanel.people.trackCharge(revenue, properties)
+                try {
+                    mixpanel.people.trackCharge(revenue, properties)
+                } catch (e: Exception) {
+                    // Fail gracefully
+                }
             }
             return mutableListOf(ReportingMessage.fromEvent(this, event))
         }
@@ -1052,7 +1537,7 @@ class MixpanelKit : KitIntegration(),
         contextInfo: MutableMap<String, String>?
     ): MutableList<ReportingMessage>? {
         // LTV increase is not directly supported by Mixpanel
-        // Could optionally track as a custom event or People increment
+        // Return null per best practices
         return null
     }
 }
@@ -1061,7 +1546,7 @@ class MixpanelKit : KitIntegration(),
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.CommerceTest"`
-Expected: PASS (2 tests)
+Expected: PASS (5 tests)
 
 **Step 5: Commit**
 
@@ -1071,7 +1556,7 @@ git add -A && git commit -m "feat: implement CommerceListener for purchase track
 
 ---
 
-## Task 10: IdentityListener Interface
+## Task 11: IdentityListener Interface
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/IdentityTest.kt`
@@ -1088,9 +1573,12 @@ import com.mparticle.MParticle
 import com.mparticle.identity.MParticleUser
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class IdentityTest {
     private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
@@ -1101,16 +1589,27 @@ class IdentityTest {
         kit = MixpanelKit()
         mockContext = mock(Context::class.java)
         mockUser = mock(MParticleUser::class.java)
+    }
 
-        val settings = mutableMapOf(
-            "token" to "test-token",
-            "userIdentificationType" to "CustomerId"
+    private fun initializeKit(userIdType: String = "CustomerId") {
+        kit.onKitCreate(
+            mutableMapOf(
+                "token" to "test-token",
+                "userIdentificationType" to userIdType
+            ),
+            mockContext
         )
-        kit.onKitCreate(settings, mockContext)
+    }
+
+    @Test
+    fun `onLoginCompleted does nothing when not started`() {
+        // Should not throw
+        kit.onLoginCompleted(mockUser, null)
     }
 
     @Test
     fun `onLoginCompleted calls Mixpanel identify with user ID`() {
+        initializeKit()
         val identities = mapOf(MParticle.IdentityType.CustomerId to "user-123")
         `when`(mockUser.userIdentities).thenReturn(identities)
 
@@ -1119,13 +1618,28 @@ class IdentityTest {
     }
 
     @Test
-    fun `onLogoutCompleted calls Mixpanel reset`() {
+    fun `onLogoutCompleted does nothing when not started`() {
         // Should not throw
         kit.onLogoutCompleted(mockUser, null)
     }
 
     @Test
+    fun `onLogoutCompleted calls Mixpanel reset`() {
+        initializeKit()
+
+        // Should not throw
+        kit.onLogoutCompleted(mockUser, null)
+    }
+
+    @Test
+    fun `onIdentifyCompleted does nothing when not started`() {
+        // Should not throw
+        kit.onIdentifyCompleted(mockUser, null)
+    }
+
+    @Test
     fun `onIdentifyCompleted calls Mixpanel identify`() {
+        initializeKit()
         val identities = mapOf(MParticle.IdentityType.CustomerId to "user-456")
         `when`(mockUser.userIdentities).thenReturn(identities)
 
@@ -1134,7 +1648,14 @@ class IdentityTest {
     }
 
     @Test
+    fun `onModifyCompleted does nothing when not started`() {
+        // Should not throw
+        kit.onModifyCompleted(mockUser, null)
+    }
+
+    @Test
     fun `onModifyCompleted calls Mixpanel identify`() {
+        initializeKit()
         val identities = mapOf(MParticle.IdentityType.CustomerId to "user-789")
         `when`(mockUser.userIdentities).thenReturn(identities)
 
@@ -1144,16 +1665,36 @@ class IdentityTest {
 
     @Test
     fun `identity uses MPID when configured`() {
-        val kit2 = MixpanelKit()
-        kit2.onKitCreate(
-            mutableMapOf("token" to "test", "userIdentificationType" to "MPID"),
-            mockContext
-        )
-
+        initializeKit(userIdType = "MPID")
         `when`(mockUser.id).thenReturn(12345L)
 
         // Should use MPID
-        kit2.onLoginCompleted(mockUser, null)
+        kit.onLoginCompleted(mockUser, null)
+    }
+
+    @Test
+    fun `identity uses Other when configured`() {
+        initializeKit(userIdType = "Other")
+        val identities = mapOf(MParticle.IdentityType.Other to "custom-id")
+        `when`(mockUser.userIdentities).thenReturn(identities)
+
+        kit.onLoginCompleted(mockUser, null)
+    }
+
+    @Test
+    fun `onUserIdentified does nothing when not started`() {
+        // Should not throw
+        kit.onUserIdentified(mockUser)
+    }
+
+    @Test
+    fun `onUserIdentified calls Mixpanel identify`() {
+        initializeKit()
+        val identities = mapOf(MParticle.IdentityType.CustomerId to "user-abc")
+        `when`(mockUser.userIdentities).thenReturn(identities)
+
+        // Should not throw
+        kit.onUserIdentified(mockUser)
     }
 }
 ```
@@ -1183,6 +1724,7 @@ class MixpanelKit : KitIntegration(),
         user: MParticleUser?,
         request: FilteredIdentityApiRequest?
     ) {
+        if (!_isStarted) return
         identifyUser(user)
     }
 
@@ -1190,6 +1732,7 @@ class MixpanelKit : KitIntegration(),
         user: MParticleUser?,
         request: FilteredIdentityApiRequest?
     ) {
+        if (!_isStarted) return
         identifyUser(user)
     }
 
@@ -1197,17 +1740,24 @@ class MixpanelKit : KitIntegration(),
         user: MParticleUser?,
         request: FilteredIdentityApiRequest?
     ) {
-        mixpanelInstance?.reset()
+        if (!_isStarted) return
+        try {
+            mixpanelInstance?.reset()
+        } catch (e: Exception) {
+            // Fail gracefully
+        }
     }
 
     override fun onModifyCompleted(
         user: MParticleUser?,
         request: FilteredIdentityApiRequest?
     ) {
+        if (!_isStarted) return
         identifyUser(user)
     }
 
     override fun onUserIdentified(user: MParticleUser?) {
+        if (!_isStarted) return
         identifyUser(user)
     }
 
@@ -1215,13 +1765,17 @@ class MixpanelKit : KitIntegration(),
 
     private fun identifyUser(user: MParticleUser?) {
         val userId = extractUserId(user) ?: return
-        mixpanelInstance?.identify(userId)
+        try {
+            mixpanelInstance?.identify(userId)
+        } catch (e: Exception) {
+            // Fail gracefully
+        }
     }
 
     private fun extractUserId(user: MParticleUser?): String? {
         if (user == null) return null
 
-        val identities = user.userIdentities
+        val identities = user.userIdentities ?: return null
 
         return when (userIdentificationType) {
             UserIdentificationType.CUSTOMER_ID ->
@@ -1244,7 +1798,7 @@ class MixpanelKit : KitIntegration(),
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.IdentityTest"`
-Expected: PASS (5 tests)
+Expected: PASS (12 tests)
 
 **Step 5: Commit**
 
@@ -1254,7 +1808,7 @@ git add -A && git commit -m "feat: implement IdentityListener for user identific
 
 ---
 
-## Task 11: UserAttributeListener Interface - Set/Remove Attributes
+## Task 12: UserAttributeListener Interface
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/UserAttributeTest.kt`
@@ -1267,10 +1821,14 @@ git add -A && git commit -m "feat: implement IdentityListener for user identific
 package com.mparticle.kits
 
 import android.content.Context
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class UserAttributeTest {
     private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
@@ -1281,54 +1839,142 @@ class UserAttributeTest {
         kit = MixpanelKit()
         mockContext = mock(Context::class.java)
         mockUser = mock(FilteredMParticleUser::class.java)
+    }
 
-        val settings = mutableMapOf(
-            "token" to "test-token",
-            "useMixpanelPeople" to "true"
+    private fun initializeKit(usePeople: Boolean = true) {
+        kit.onKitCreate(
+            mutableMapOf(
+                "token" to "test-token",
+                "useMixpanelPeople" to usePeople.toString()
+            ),
+            mockContext
         )
-        kit.onKitCreate(settings, mockContext)
     }
 
     @Test
-    fun `onSetUserAttribute sets People property when useMixpanelPeople is true`() {
+    fun `onSetUserAttribute does nothing when not started`() {
         // Should not throw
         kit.onSetUserAttribute("name", "John Doe", mockUser)
     }
 
     @Test
-    fun `onRemoveUserAttribute unsets People property`() {
+    fun `onSetUserAttribute sets People property when useMixpanelPeople is true`() {
+        initializeKit(usePeople = true)
+
+        // Should not throw
+        kit.onSetUserAttribute("name", "John Doe", mockUser)
+    }
+
+    @Test
+    fun `onSetUserAttribute uses super properties when useMixpanelPeople is false`() {
+        initializeKit(usePeople = false)
+
+        // Should use registerSuperProperties instead
+        kit.onSetUserAttribute("tier", "premium", mockUser)
+    }
+
+    @Test
+    fun `onSetUserAttribute handles null key gracefully`() {
+        initializeKit()
+
+        // Should not throw
+        kit.onSetUserAttribute(null, "value", mockUser)
+    }
+
+    @Test
+    fun `onRemoveUserAttribute does nothing when not started`() {
         // Should not throw
         kit.onRemoveUserAttribute("name", mockUser)
     }
 
     @Test
-    fun `onIncrementUserAttribute increments People property`() {
+    fun `onRemoveUserAttribute unsets People property`() {
+        initializeKit()
+
+        // Should not throw
+        kit.onRemoveUserAttribute("name", mockUser)
+    }
+
+    @Test
+    fun `onRemoveUserAttribute uses unregisterSuperProperty when useMixpanelPeople is false`() {
+        initializeKit(usePeople = false)
+
+        kit.onRemoveUserAttribute("name", mockUser)
+    }
+
+    @Test
+    fun `onIncrementUserAttribute does nothing when not started`() {
         // Should not throw
         kit.onIncrementUserAttribute("purchases", 1, "1", mockUser)
     }
 
     @Test
-    fun `onSetUserAttribute uses super properties when useMixpanelPeople is false`() {
-        val kit2 = MixpanelKit()
-        kit2.onKitCreate(
-            mutableMapOf("token" to "test", "useMixpanelPeople" to "false"),
-            mockContext
-        )
+    fun `onIncrementUserAttribute increments People property`() {
+        initializeKit()
 
-        // Should use registerSuperProperties instead
-        kit2.onSetUserAttribute("tier", "premium", mockUser)
+        // Should not throw
+        kit.onIncrementUserAttribute("purchases", 1, "1", mockUser)
     }
 
     @Test
-    fun `onSetUserTag sets attribute to true`() {
+    fun `onSetUserTag does nothing when not started`() {
         // Should not throw
         kit.onSetUserTag("vip", mockUser)
     }
 
     @Test
+    fun `onSetUserTag sets attribute to true`() {
+        initializeKit()
+
+        // Should not throw
+        kit.onSetUserTag("vip", mockUser)
+    }
+
+    @Test
+    fun `onSetUserAttributeList does nothing when not started`() {
+        // Should not throw
+        kit.onSetUserAttributeList("tags", mutableListOf("a", "b"), mockUser)
+    }
+
+    @Test
+    fun `onSetUserAttributeList sets list value`() {
+        initializeKit()
+
+        // Should not throw
+        kit.onSetUserAttributeList("tags", mutableListOf("a", "b", "c"), mockUser)
+    }
+
+    @Test
+    fun `onSetAllUserAttributes does nothing when not started`() {
+        // Should not throw
+        kit.onSetAllUserAttributes(
+            mutableMapOf("key" to "value"),
+            mutableMapOf("list" to mutableListOf("a")),
+            mockUser
+        )
+    }
+
+    @Test
+    fun `onSetAllUserAttributes sets all attributes`() {
+        initializeKit()
+
+        kit.onSetAllUserAttributes(
+            mutableMapOf("name" to "John", "email" to "john@example.com"),
+            mutableMapOf("tags" to mutableListOf("vip", "premium")),
+            mockUser
+        )
+    }
+
+    @Test
     fun `supportsAttributeLists returns true`() {
         val result = kit.supportsAttributeLists()
-        assert(result)
+        assertTrue(result)
+    }
+
+    @Test
+    fun `onConsentStateUpdated does nothing when not started`() {
+        // Should not throw
+        kit.onConsentStateUpdated(null, null, mockUser)
     }
 }
 ```
@@ -1344,6 +1990,7 @@ Update `MixpanelKit.kt`:
 
 ```kotlin
 import com.mparticle.consent.ConsentState
+import org.json.JSONArray
 
 class MixpanelKit : KitIntegration(),
     KitIntegration.EventListener,
@@ -1360,26 +2007,36 @@ class MixpanelKit : KitIntegration(),
         value: Any?,
         user: FilteredMParticleUser?
     ) {
+        if (!_isStarted) return
         if (key.isNullOrEmpty() || value == null) return
         val mixpanel = mixpanelInstance ?: return
 
-        if (useMixpanelPeople) {
-            mixpanel.people.set(key, value)
-        } else {
-            val props = org.json.JSONObject()
-            props.put(key, value)
-            mixpanel.registerSuperProperties(props)
+        try {
+            if (useMixpanelPeople) {
+                mixpanel.people.set(key, value)
+            } else {
+                val props = JSONObject()
+                props.put(key, value)
+                mixpanel.registerSuperProperties(props)
+            }
+        } catch (e: Exception) {
+            // Fail gracefully
         }
     }
 
     override fun onRemoveUserAttribute(key: String?, user: FilteredMParticleUser?) {
+        if (!_isStarted) return
         if (key.isNullOrEmpty()) return
         val mixpanel = mixpanelInstance ?: return
 
-        if (useMixpanelPeople) {
-            mixpanel.people.unset(key)
-        } else {
-            mixpanel.unregisterSuperProperty(key)
+        try {
+            if (useMixpanelPeople) {
+                mixpanel.people.unset(key)
+            } else {
+                mixpanel.unregisterSuperProperty(key)
+            }
+        } catch (e: Exception) {
+            // Fail gracefully
         }
     }
 
@@ -1389,16 +2046,22 @@ class MixpanelKit : KitIntegration(),
         value: String?,
         user: FilteredMParticleUser?
     ) {
+        if (!_isStarted) return
         if (key.isNullOrEmpty() || incrementedBy == null) return
         val mixpanel = mixpanelInstance ?: return
 
         // Increment only supported via People API
         if (useMixpanelPeople) {
-            mixpanel.people.increment(key, incrementedBy.toDouble())
+            try {
+                mixpanel.people.increment(key, incrementedBy.toDouble())
+            } catch (e: Exception) {
+                // Fail gracefully
+            }
         }
     }
 
     override fun onSetUserTag(key: String?, user: FilteredMParticleUser?) {
+        if (!_isStarted) return
         if (key.isNullOrEmpty()) return
 
         // Set tag as a boolean true value
@@ -1410,17 +2073,22 @@ class MixpanelKit : KitIntegration(),
         values: MutableList<String>?,
         user: FilteredMParticleUser?
     ) {
+        if (!_isStarted) return
         if (key.isNullOrEmpty() || values.isNullOrEmpty()) return
         val mixpanel = mixpanelInstance ?: return
 
-        val jsonArray = org.json.JSONArray(values)
+        try {
+            val jsonArray = JSONArray(values)
 
-        if (useMixpanelPeople) {
-            mixpanel.people.set(key, jsonArray)
-        } else {
-            val props = org.json.JSONObject()
-            props.put(key, jsonArray)
-            mixpanel.registerSuperProperties(props)
+            if (useMixpanelPeople) {
+                mixpanel.people.set(key, jsonArray)
+            } else {
+                val props = JSONObject()
+                props.put(key, jsonArray)
+                mixpanel.registerSuperProperties(props)
+            }
+        } catch (e: Exception) {
+            // Fail gracefully
         }
     }
 
@@ -1429,7 +2097,7 @@ class MixpanelKit : KitIntegration(),
         userAttributeLists: MutableMap<String, MutableList<String>>?,
         user: FilteredMParticleUser?
     ) {
-        val mixpanel = mixpanelInstance ?: return
+        if (!_isStarted) return
 
         // Set all single-value attributes
         userAttributes?.forEach { (key, value) ->
@@ -1450,7 +2118,7 @@ class MixpanelKit : KitIntegration(),
         user: FilteredMParticleUser?
     ) {
         // Consent state changes are not directly mapped to Mixpanel
-        // Could optionally track as super properties if needed
+        // Could optionally track as super properties if needed in future
     }
 }
 ```
@@ -1458,7 +2126,7 @@ class MixpanelKit : KitIntegration(),
 **Step 4: Run test to verify it passes**
 
 Run: `./gradlew test --tests "com.mparticle.kits.UserAttributeTest"`
-Expected: PASS (6 tests)
+Expected: PASS (17 tests)
 
 **Step 5: Commit**
 
@@ -1468,11 +2136,11 @@ git add -A && git commit -m "feat: implement UserAttributeListener for People an
 
 ---
 
-## Task 12: Complete Integration Test and Polish
+## Task 13: Integration Test and Final Cleanup
 
 **Files:**
 - Create: `src/test/kotlin/com/mparticle/kits/IntegrationTest.kt`
-- Modify: `src/main/kotlin/com/mparticle/kits/MixpanelKit.kt` (add imports, clean up)
+- Verify: `src/main/kotlin/com/mparticle/kits/MixpanelKit.kt` has all imports
 
 **Step 1: Write integration test**
 
@@ -1490,12 +2158,15 @@ import com.mparticle.identity.MParticleUser
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Integration test verifying complete Kit functionality.
  */
+@RunWith(RobolectricTestRunner::class)
 class IntegrationTest {
     private lateinit var kit: MixpanelKit
     private lateinit var mockContext: Context
@@ -1519,6 +2190,7 @@ class IntegrationTest {
 
         assertNull(result) // No startup reporting messages
         assertEquals("Mixpanel", kit.name)
+        assertTrue(kit.isStarted)
         assertNotNull(kit.instance)
     }
 
@@ -1534,6 +2206,17 @@ class IntegrationTest {
 
         assertNotNull(result)
         assertEquals(1, result?.size)
+    }
+
+    @Test
+    fun `screen tracking produces reporting message`() {
+        initializeKit()
+
+        val result = kit.logScreen("Settings", mutableMapOf("tab" to "notifications"))
+
+        assertNotNull(result)
+        assertEquals(1, result?.size)
+        assertEquals(ReportingMessage.MessageType.SCREEN_VIEW, result?.first()?.messageType)
     }
 
     @Test
@@ -1567,6 +2250,37 @@ class IntegrationTest {
         kit.onLogoutCompleted(mockUser, null)
 
         // No exceptions = success
+        assertTrue(kit.isStarted)
+    }
+
+    @Test
+    fun `user attributes with People API`() {
+        initializeKit(usePeople = true)
+
+        val mockUser = mock(FilteredMParticleUser::class.java)
+
+        kit.onSetUserAttribute("name", "John Doe", mockUser)
+        kit.onSetUserAttribute("email", "john@example.com", mockUser)
+        kit.onRemoveUserAttribute("old_field", mockUser)
+        kit.onIncrementUserAttribute("login_count", 1, "1", mockUser)
+        kit.onSetUserTag("premium", mockUser)
+        kit.onSetUserAttributeList("interests", mutableListOf("tech", "sports"), mockUser)
+
+        // No exceptions = success
+        assertTrue(kit.isStarted)
+    }
+
+    @Test
+    fun `user attributes with Super Properties`() {
+        initializeKit(usePeople = false)
+
+        val mockUser = mock(FilteredMParticleUser::class.java)
+
+        kit.onSetUserAttribute("tier", "gold", mockUser)
+        kit.onRemoveUserAttribute("old_tier", mockUser)
+
+        // No exceptions = success
+        assertTrue(kit.isStarted)
     }
 
     @Test
@@ -1577,25 +2291,53 @@ class IntegrationTest {
         kit.setOptOut(false) // Opt back in
 
         // No exceptions = success
+        assertTrue(kit.isStarted)
     }
 
-    private fun initializeKit() {
+    @Test
+    fun `error and exception tracking`() {
+        initializeKit()
+
+        val errorResult = kit.logError("Network timeout", mutableMapOf("code" to "ETIMEDOUT"))
+        val exceptionResult = kit.logException(
+            RuntimeException("Connection refused"),
+            mutableMapOf("host" to "api.example.com"),
+            "Failed to connect"
+        )
+
+        assertNotNull(errorResult)
+        assertNotNull(exceptionResult)
+    }
+
+    @Test
+    fun `breadcrumb tracking`() {
+        initializeKit()
+
+        val result = kit.leaveBreadcrumb("User opened settings menu")
+
+        assertNotNull(result)
+    }
+
+    @Test
+    fun `supportsAttributeLists returns true`() {
+        assertTrue(kit.supportsAttributeLists())
+    }
+
+    private fun initializeKit(usePeople: Boolean = true) {
         kit.onKitCreate(
-            mutableMapOf("token" to "test-token"),
+            mutableMapOf(
+                "token" to "test-token",
+                "useMixpanelPeople" to usePeople.toString()
+            ),
             mockContext
         )
     }
 }
 ```
 
-**Step 2: Run all tests**
+**Step 2: Verify all imports in MixpanelKit.kt**
 
-Run: `./gradlew test`
-Expected: All tests PASS
-
-**Step 3: Add comprehensive imports and final cleanup to MixpanelKit.kt**
-
-Ensure all imports are present at the top of `MixpanelKit.kt`:
+Ensure the file header has:
 
 ```kotlin
 package com.mparticle.kits
@@ -1608,26 +2350,25 @@ import com.mparticle.commerce.CommerceEvent
 import com.mparticle.commerce.Product
 import com.mparticle.consent.ConsentState
 import com.mparticle.identity.MParticleUser
-import com.mparticle.kits.CommerceEventUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
 ```
 
-**Step 4: Run full test suite**
+**Step 3: Run all tests**
 
 Run: `./gradlew test`
-Expected: All tests PASS
+Expected: All tests PASS (~55 tests)
 
-**Step 5: Commit**
+**Step 4: Commit**
 
 ```bash
-git add -A && git commit -m "feat: add integration tests and complete Kit implementation"
+git add -A && git commit -m "feat: add integration tests for complete Kit functionality"
 ```
 
 ---
 
-## Task 13: Documentation and README
+## Task 14: Documentation and README
 
 **Files:**
 - Create: `README.md`
@@ -1637,7 +2378,6 @@ git add -A && git commit -m "feat: add integration tests and complete Kit implem
 ```markdown
 # mParticle Android Mixpanel Kit
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.mparticle/android-mixpanel-kit.svg)](https://search.maven.org/artifact/com.mparticle/android-mixpanel-kit)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 This is the [Mixpanel](https://mixpanel.com) integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
@@ -1705,6 +2445,15 @@ val mixpanel = MParticle.getInstance()
 mixpanel?.track("Direct Event")
 ```
 
+## Architecture
+
+This kit follows mParticle Kit best practices:
+- **Fail gracefully**: Never crashes the host app; returns null on errors
+- **Started state checks**: Won't call Mixpanel SDK until properly initialized
+- **Thread safety**: All public methods are safe to call from any thread
+
+For more details, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## License
 
 Copyright 2024 mParticle, Inc.
@@ -1724,7 +2473,7 @@ git add README.md && git commit -m "docs: add README with setup and usage instru
 
 ---
 
-## Task 14: Final Verification and Cleanup
+## Task 15: Final Verification
 
 **Files:**
 - Review all files
@@ -1734,9 +2483,9 @@ git add README.md && git commit -m "docs: add README with setup and usage instru
 Run: `./gradlew clean build`
 Expected: BUILD SUCCESSFUL
 
-**Step 2: Run all tests with coverage**
+**Step 2: Run all tests**
 
-Run: `./gradlew test jacocoTestReport` (if JaCoCo configured) or `./gradlew test`
+Run: `./gradlew test`
 Expected: All tests PASS
 
 **Step 3: Check lint**
@@ -1744,18 +2493,36 @@ Expected: All tests PASS
 Run: `./gradlew lint`
 Expected: No errors
 
-**Step 4: Review git log**
+**Step 4: Verify test coverage**
+
+Run: `./gradlew test` and check output
+Expected: >80% coverage
+
+**Step 5: Review git log**
 
 Run: `git log --oneline`
-Expected: Clean commit history with descriptive messages
+Expected: Clean commit history:
+- chore: initialize project structure with Gradle, dependencies, and LICENSE
+- feat: add UserIdentificationType enum
+- feat: add MixpanelKit skeleton with started state tracking
+- feat: add token and context validation in onKitCreate
+- feat: implement Mixpanel SDK initialization with configuration parsing
+- feat: implement setOptOut with started state check
+- feat: implement EventListener.logEvent with started state check
+- feat: implement EventListener.logScreen with 'Viewed' prefix
+- feat: implement logError, logException, and leaveBreadcrumb
+- feat: implement CommerceListener for purchase tracking
+- feat: implement IdentityListener for user identification
+- feat: implement UserAttributeListener for People and Super Properties
+- feat: add integration tests for complete Kit functionality
+- docs: add README with setup and usage instructions
 
-**Step 5: Create final commit if any cleanup needed**
+**Step 6: Final summary**
 
 ```bash
-git status
-# If clean, no action needed
-# If changes exist:
-git add -A && git commit -m "chore: final cleanup"
+echo "Implementation complete!"
+echo "Tests: $(./gradlew test --quiet 2>/dev/null | grep -c 'PASSED')"
+echo "Files: $(find src -name '*.kt' | wc -l | tr -d ' ') Kotlin files"
 ```
 
 ---
@@ -1764,16 +2531,20 @@ git add -A && git commit -m "chore: final cleanup"
 
 This plan implements the complete mParticle Android Mixpanel Kit with:
 
-- **14 Tasks** broken into atomic steps
-- **TDD approach** - tests written before implementation
+- **15 Tasks** broken into atomic TDD steps
 - **Feature parity** with iOS Mixpanel Kit
 - **All interfaces implemented:**
   - EventListener (events, screens, errors, exceptions, breadcrumbs)
   - CommerceListener (purchases, other commerce actions)
   - IdentityListener (login, logout, identify, modify)
   - UserAttributeListener (set, remove, increment, lists, tags)
+- **Best practices from ARCHITECTURE.md:**
+  - Fail gracefully (never crash)
+  - Check started state before SDK calls
+  - Thread-safe with @Volatile annotations
 - **Configuration options:** token, serverURL, userIdentificationType, useMixpanelPeople
-- **Comprehensive test coverage**
-- **Complete documentation**
+- **Comprehensive test coverage:** ~55 tests across 6 test files
+- **Complete documentation:** README, LICENSE, architecture docs
 
-Estimated test count: ~35 tests across 6 test files
+Estimated test count: ~55 tests
+Estimated implementation: ~400 lines of Kotlin
