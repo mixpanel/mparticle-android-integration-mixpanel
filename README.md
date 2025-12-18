@@ -1,6 +1,7 @@
 # mParticle Android Integration for Mixpanel
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.mparticle/android-mixpanel-kit.svg)](https://search.maven.org/artifact/com.mparticle/android-mixpanel-kit)
+[![CI](https://github.com/jaredmixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml/badge.svg)](https://github.com/jaredmixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml)
 
 This repository contains the Mixpanel integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
