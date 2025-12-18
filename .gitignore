@@ -1,2 +1,11 @@
 mparticle-kit-context/
 .DS_Store
+
+# Gradle
+.gradle/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
