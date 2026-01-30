@@ -687,7 +687,7 @@ open class MixpanelKit : KitIntegration(),
         } catch (e: ClassNotFoundException) {
             Log.w(LOG_TAG, "Session Replay SDK not available. Add 'com.mixpanel.android:mixpanel-android-session-replay' dependency to enable.")
         } catch (e: NoSuchMethodException) {
-            Log.e(LOG_TAG, "Session Replay SDK API mismatch: ${e.message}")
+            Log.e(LOG_TAG, "Session Replay SDK API mismatch: ${e.message}", e)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to initialize Session Replay: ${e.message}", e)
         }

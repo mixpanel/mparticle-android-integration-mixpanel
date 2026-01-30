@@ -36,6 +36,9 @@ class TestableMixpanelKit : MixpanelKit() {
             setUseMixpanelPeople(value.lowercase() == "true")
         }
 
+        // Parse Session Replay configuration
+        setSessionReplayConfig(SessionReplayConfiguration.fromSettings(settings))
+
         // Use mock if available, otherwise call real SDK
         if (mockMixpanelAPI != null) {
             setMixpanelInstance(mockMixpanelAPI!!)
