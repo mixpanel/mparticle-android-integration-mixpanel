@@ -633,46 +633,37 @@ open class MixpanelKit : KitIntegration(),
 
         try {
             // Check if Session Replay SDK is available
-            val sessionReplayClass = Class.forName("com.mixpanel.sessionreplay.MPSessionReplay")
-            val configBuilderClass = Class.forName("com.mixpanel.sessionreplay.MPSessionReplayConfig\$Builder")
+            val sessionReplayClass = Class.forName("com.mixpanel.android.sessionreplay.MPSessionReplay")
+            val configClass = Class.forName("com.mixpanel.android.sessionreplay.models.MPSessionReplayConfig")
+            val autoMaskedViewClass = Class.forName("com.mixpanel.android.sessionreplay.sensitive_views.AutoMaskedView")
 
-            // Build the configuration using reflection
-            val builderConstructor = configBuilderClass.getConstructor()
-            val builder = builderConstructor.newInstance()
+            // Build autoMaskedViews set based on mask configuration
+            val autoMaskedViews = buildAutoMaskedViewsSet(autoMaskedViewClass)
 
-            // Set configuration options
-            val setRecordSessionsPercent = configBuilderClass.getMethod("recordSessionsPercent", Double::class.java)
-            setRecordSessionsPercent.invoke(builder, sessionReplayConfig.recordSessionsPercent)
+            // Create MPSessionReplayConfig using data class constructor
+            // Constructor params: wifiOnly, flushInterval, autoStartRecording, recordingSessionsPercent, autoMaskedViews, enableLogging
+            val configConstructor = configClass.getConstructor(
+                Boolean::class.java,      // wifiOnly
+                Long::class.java,         // flushInterval
+                Boolean::class.java,      // autoStartRecording
+                Double::class.java,       // recordingSessionsPercent
+                Set::class.java,          // autoMaskedViews
+                Boolean::class.java       // enableLogging
+            )
 
-            val setAutoStartRecording = configBuilderClass.getMethod("autoStartRecording", Boolean::class.java)
-            setAutoStartRecording.invoke(builder, sessionReplayConfig.autoStartRecording)
-
-            val setWifiOnly = configBuilderClass.getMethod("wifiOnly", Boolean::class.java)
-            setWifiOnly.invoke(builder, sessionReplayConfig.wifiOnly)
-
-            val setMaskImages = configBuilderClass.getMethod("maskImages", Boolean::class.java)
-            setMaskImages.invoke(builder, sessionReplayConfig.maskImages)
-
-            val setMaskText = configBuilderClass.getMethod("maskText", Boolean::class.java)
-            setMaskText.invoke(builder, sessionReplayConfig.maskText)
-
-            val setMaskWebViews = configBuilderClass.getMethod("maskWebViews", Boolean::class.java)
-            setMaskWebViews.invoke(builder, sessionReplayConfig.maskWebViews)
-
-            val setEnableLogging = configBuilderClass.getMethod("enableLogging", Boolean::class.java)
-            setEnableLogging.invoke(builder, sessionReplayConfig.enableLogging)
-
-            val setFlushInterval = configBuilderClass.getMethod("flushInterval", Int::class.java)
-            setFlushInterval.invoke(builder, sessionReplayConfig.flushIntervalSeconds)
-
-            val buildMethod = configBuilderClass.getMethod("build")
-            val config = buildMethod.invoke(builder)
+            val config = configConstructor.newInstance(
+                sessionReplayConfig.wifiOnly,
+                sessionReplayConfig.flushIntervalSeconds.toLong(),
+                sessionReplayConfig.autoStartRecording,
+                sessionReplayConfig.recordSessionsPercent,
+                autoMaskedViews,
+                sessionReplayConfig.enableLogging
+            )
 
             // Get the distinct ID from Mixpanel
             val distinctId = mixpanelInstance?.distinctId ?: ""
 
             // Initialize Session Replay
-            val configClass = Class.forName("com.mixpanel.sessionreplay.MPSessionReplayConfig")
             val initializeMethod = sessionReplayClass.getMethod(
                 "initialize",
                 Context::class.java,
@@ -685,12 +676,38 @@ open class MixpanelKit : KitIntegration(),
             Log.i(LOG_TAG, "Session Replay initialized successfully")
 
         } catch (e: ClassNotFoundException) {
-            Log.w(LOG_TAG, "Session Replay SDK not available. Add 'com.mixpanel.android:mixpanel-android-session-replay' dependency to enable.")
+            Log.w(LOG_TAG, "Session Replay SDK not available. Add 'com.mixpanel.android:mixpanel-android-session-replay' dependency to enable.", e)
         } catch (e: NoSuchMethodException) {
             Log.e(LOG_TAG, "Session Replay SDK API mismatch: ${e.message}", e)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to initialize Session Replay: ${e.message}", e)
         }
+    }
+
+    /**
+     * Build autoMaskedViews set from boolean mask flags.
+     * Maps maskImages/maskText/maskWebViews to AutoMaskedView enum values.
+     */
+    private fun buildAutoMaskedViewsSet(autoMaskedViewClass: Class<*>): Set<Any> {
+        val result = mutableSetOf<Any>()
+
+        // Get enum constants: Text, Image, Web
+        val enumConstants = autoMaskedViewClass.enumConstants as Array<*>
+
+        for (constant in enumConstants) {
+            val name = (constant as Enum<*>).name
+            val shouldInclude = when (name) {
+                "Text" -> sessionReplayConfig.maskText
+                "Image" -> sessionReplayConfig.maskImages
+                "Web" -> sessionReplayConfig.maskWebViews
+                else -> false
+            }
+            if (shouldInclude) {
+                result.add(constant)
+            }
+        }
+
+        return result
     }
 
     /**
