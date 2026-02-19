@@ -298,35 +298,11 @@ class IntegrationTest {
     }
 
     @Test
-    fun `onSetUserAttribute maps Gender to gender`() {
-        initializeKit()
-        val mockUser = mock(FilteredMParticleUser::class.java)
-        kit.onSetUserAttribute(MParticle.UserAttributes.GENDER, "Female", mockUser)
-        verify(mockPeople).set("\$gender", "Female")
-    }
-
-    @Test
     fun `onSetUserAttribute maps City to city`() {
         initializeKit()
         val mockUser = mock(FilteredMParticleUser::class.java)
         kit.onSetUserAttribute(MParticle.UserAttributes.CITY, "San Francisco", mockUser)
         verify(mockPeople).set("\$city", "San Francisco")
-    }
-
-    @Test
-    fun `onSetUserAttribute maps Zipcode to zip`() {
-        initializeKit()
-        val mockUser = mock(FilteredMParticleUser::class.java)
-        kit.onSetUserAttribute(MParticle.UserAttributes.ZIPCODE, "94103", mockUser)
-        verify(mockPeople).set("\$zip", "94103")
-    }
-
-    @Test
-    fun `onSetUserAttribute maps Email to email`() {
-        initializeKit()
-        val mockUser = mock(FilteredMParticleUser::class.java)
-        kit.onSetUserAttribute("\$Email", "john@example.com", mockUser)
-        verify(mockPeople).set("\$email", "john@example.com")
     }
 
     @Test

@@ -607,12 +607,9 @@ open class MixpanelKit : KitIntegration(),
             MParticle.UserAttributes.FIRSTNAME to "\$first_name",
             MParticle.UserAttributes.LASTNAME to "\$last_name",
             MParticle.UserAttributes.MOBILE_NUMBER to "\$phone",
-            MParticle.UserAttributes.GENDER to "\$gender",
             MParticle.UserAttributes.CITY to "\$city",
             MParticle.UserAttributes.STATE to "\$region",
             MParticle.UserAttributes.COUNTRY to "\$country_code",
-            MParticle.UserAttributes.ZIPCODE to "\$zip",
-            "\$Email" to "\$email"
         )
     }
 
