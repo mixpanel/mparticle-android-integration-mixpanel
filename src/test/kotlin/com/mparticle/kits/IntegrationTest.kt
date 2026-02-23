@@ -255,6 +255,89 @@ class IntegrationTest {
         verify(mockPeople).set(eq("interests"), any())
     }
 
+    // Reserved Attribute Mapping Tests
+
+    @Test
+    fun `onSetUserAttribute maps FirstName to first_name`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.FIRSTNAME, "John", mockUser)
+        verify(mockPeople).set("\$first_name", "John")
+    }
+
+    @Test
+    fun `onSetUserAttribute maps LastName to last_name`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.LASTNAME, "Doe", mockUser)
+        verify(mockPeople).set("\$last_name", "Doe")
+    }
+
+    @Test
+    fun `onSetUserAttribute maps Mobile to phone`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.MOBILE_NUMBER, "1234-5678-90", mockUser)
+        verify(mockPeople).set("\$phone", "1234-5678-90")
+    }
+
+    @Test
+    fun `onSetUserAttribute maps Country to country_code`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.COUNTRY, "USA", mockUser)
+        verify(mockPeople).set("\$country_code", "USA")
+    }
+
+    @Test
+    fun `onSetUserAttribute maps State to region`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.STATE, "California", mockUser)
+        verify(mockPeople).set("\$region", "California")
+    }
+
+    @Test
+    fun `onSetUserAttribute maps City to city`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.CITY, "San Francisco", mockUser)
+        verify(mockPeople).set("\$city", "San Francisco")
+    }
+
+    @Test
+    fun `onSetUserAttribute passes through non-reserved keys unchanged`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute("custom_attribute", "custom_value", mockUser)
+        verify(mockPeople).set("custom_attribute", "custom_value")
+    }
+
+    @Test
+    fun `onRemoveUserAttribute maps reserved key`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onRemoveUserAttribute(MParticle.UserAttributes.FIRSTNAME, mockUser)
+        verify(mockPeople).unset("\$first_name")
+    }
+
+    @Test
+    fun `onIncrementUserAttribute passes through unmapped keys`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        // AGE is not in the reserved mapping, so it passes through unchanged
+        kit.onIncrementUserAttribute(MParticle.UserAttributes.AGE, 1, "30", mockUser)
+        verify(mockPeople).increment(MParticle.UserAttributes.AGE, 1.0)
+    }
+
+    @Test
+    fun `onSetUserAttributeList maps reserved key`() {
+        initializeKit()
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttributeList(MParticle.UserAttributes.FIRSTNAME, mutableListOf("John", "Johnny"), mockUser)
+        verify(mockPeople).set(eq("\$first_name"), any())
+    }
+
     // Opt-out Tests
 
     @Test
@@ -289,6 +372,15 @@ class IntegrationTest {
         kit.onRemoveUserAttribute("key", mockUser)
         verify(mockMixpanel).unregisterSuperProperty("key")
         verify(mockPeople, never()).unset(any())
+    }
+
+    @Test
+    fun `onSetUserAttribute with usePeople false and reserved key calls registerSuperProperties`() {
+        initializeKit(usePeople = false)
+        val mockUser = mock(FilteredMParticleUser::class.java)
+        kit.onSetUserAttribute(MParticle.UserAttributes.FIRSTNAME, "John", mockUser)
+        verify(mockMixpanel).registerSuperProperties(any())
+        verify(mockPeople, never()).set(any<String>(), any())
     }
 
     // MPID identity type test
