@@ -7,6 +7,7 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.kits.mocks.MockSessionReplay
 import com.mparticle.kits.mocks.MockSessionReplayNoGetInstance
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -15,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
@@ -374,7 +374,7 @@ class SessionReplayBehaviorTest {
 
         val replayId = kit.getSessionReplayId()
         verify(mockSR).getReplayId()
-        assertSame("mock-replay-id", replayId)
+        assertEquals("mock-replay-id", replayId)
     }
 
     @Test

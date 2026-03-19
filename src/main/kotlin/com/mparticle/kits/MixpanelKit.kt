@@ -84,7 +84,12 @@ open class MixpanelKit : KitIntegration(),
                 _sessionReplayClass = null
                 null
             } catch (e: Exception) {
-                Log.d(LOG_TAG, "Session Replay instance not yet available: ${e.message}")
+                Log.e(
+                    LOG_TAG,
+                    "Session Replay integration error while resolving instance. Disabling Session Replay.",
+                    e
+                )
+                _sessionReplayClass = null
                 null
             }
         }
@@ -781,10 +786,23 @@ open class MixpanelKit : KitIntegration(),
                 configClass
             )
 
-            _sessionReplayClass = sessionReplayClass
             initializeMethod.invoke(null, context.applicationContext, token, distinctId, config)
+            _sessionReplayClass = sessionReplayClass
             resolveSessionReplayInstance()
-            Log.i(LOG_TAG, "Session Replay initialized, instance=${_sessionReplayInstance != null} (will resolve lazily if async)")
+
+            val instanceResolved = _sessionReplayInstance != null
+            val integrationDisabled = _sessionReplayClass == null && !instanceResolved
+            when {
+                instanceResolved -> {
+                    Log.i(LOG_TAG, "Session Replay initialized, instance resolved synchronously")
+                }
+                integrationDisabled -> {
+                    Log.w(LOG_TAG, "Session Replay initialization attempted, but integration was disabled due to reflection/API mismatch; instance will not be resolved lazily")
+                }
+                else -> {
+                    Log.i(LOG_TAG, "Session Replay initialized, instance not yet available (will resolve lazily if Session Replay completes async init)")
+                }
+            }
 
         } catch (e: ClassNotFoundException) {
             Log.w(LOG_TAG, "Session Replay SDK not available. Add 'com.mixpanel.android:mixpanel-android-session-replay' dependency to enable.", e)
@@ -792,6 +810,8 @@ open class MixpanelKit : KitIntegration(),
             Log.e(LOG_TAG, "Session Replay SDK API mismatch: ${e.message}", e)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to initialize Session Replay: ${e.message}", e)
+            _sessionReplayClass = null
+            _sessionReplayInstance = null
         }
     }
 
