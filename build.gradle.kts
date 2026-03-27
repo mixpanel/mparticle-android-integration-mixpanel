@@ -26,14 +26,14 @@ android {
     lint {
         // Disable mParticle's lint detector that crashes with Kotlin DSL
         disable += "MParticleVersionInconsistency"
-        // Allow dynamic versions for kit dependencies
+        // Allow dynamic version for compileOnly session-replay dependency
         disable += "GradleDynamicVersion"
     }
 }
 
 dependencies {
-    api("com.mparticle:android-kit-base:5.+")
-    api("com.mixpanel.android:mixpanel-android:8.+")
+    api("com.mparticle:android-kit-base:5.78.5")
+    api("com.mixpanel.android:mixpanel-android:8.4.0")
     compileOnly("com.mixpanel.android:mixpanel-android-session-replay:1.+")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.8.0")
