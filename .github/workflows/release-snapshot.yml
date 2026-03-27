@@ -1,6 +1,7 @@
 name: Publish Snapshot to Maven Central
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
