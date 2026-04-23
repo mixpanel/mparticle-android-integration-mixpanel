@@ -1,0 +1,10 @@
+{
+  "mparticle": {
+    "tag_prefix": "v",
+    "gradle_properties": "gradle.properties",
+    "changelog": "CHANGELOG.md",
+    "readme": "README.md",
+    "gradle_task_prefix": ":",
+    "artifact_id": "mparticle-android-integration-mixpanel"
+  }
+}

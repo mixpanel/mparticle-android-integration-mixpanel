@@ -1,7 +1,11 @@
 # mParticle Android Integration for Mixpanel
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.mparticle/android-mixpanel-kit.svg)](https://search.maven.org/artifact/com.mparticle/android-mixpanel-kit)
-[![CI](https://github.com/jaredmixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml/badge.svg)](https://github.com/jaredmixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.mixpanel.android/mparticle-android-integration-mixpanel.svg)](https://central.sonatype.com/artifact/com.mixpanel.android/mparticle-android-integration-mixpanel)
+[![CI](https://github.com/mixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml/badge.svg)](https://github.com/mixpanel/mparticle-android-integration-mixpanel/actions/workflows/ci.yml)
+
+# Latest Version
+
+##### _April 22, 2026_ - [v1.0.0](https://github.com/mixpanel/mparticle-android-integration-mixpanel/releases/tag/v1.0.0)
 
 This repository contains the Mixpanel integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
@@ -11,7 +15,7 @@ Add the kit dependency to your app's `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.mparticle:android-mixpanel-kit:5+'
+    implementation 'com.mixpanel.android:mparticle-android-integration-mixpanel:1.+'
 
     // Optional: Add Session Replay SDK for session recording
     implementation 'com.mixpanel.android:mixpanel-android-session-replay:1.+'
