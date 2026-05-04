@@ -55,14 +55,15 @@ class MavenPublishConventionPlugin : Plugin<Project> {
     }
 
     private fun Project.registerJarTasks() {
-        tasks.register<Jar>("emptySourcesJar") {
+        tasks.register<Jar>("sourcesJar") {
             archiveClassifier.set("sources")
-            archiveBaseName.set("${project.name}-empty")
+            from("src/main/java", "src/main/kotlin")
         }
 
-        tasks.register<Jar>("emptyJavadocJar") {
+        // Maven Central requires a javadoc jar; include sources as documentation
+        // until Dokka is added for proper KDoc generation
+        tasks.register<Jar>("javadocJar") {
             archiveClassifier.set("javadoc")
-            archiveBaseName.set("${project.name}-empty")
         }
     }
 
@@ -71,7 +72,7 @@ class MavenPublishConventionPlugin : Plugin<Project> {
 
         // Release publication
         tasks.named("generateMetadataFileForReleasePublication").configure {
-            dependsOn(bundleTask, "emptySourcesJar", "emptyJavadocJar")
+            dependsOn(bundleTask, "sourcesJar", "javadocJar")
         }
         tasks.named("generatePomFileForReleasePublication").configure {
             dependsOn(bundleTask)
@@ -79,7 +80,7 @@ class MavenPublishConventionPlugin : Plugin<Project> {
 
         // Snapshot publication
         tasks.named("generateMetadataFileForSnapshotPublication").configure {
-            dependsOn(bundleTask, "emptySourcesJar", "emptyJavadocJar")
+            dependsOn(bundleTask, "sourcesJar", "javadocJar")
         }
         tasks.named("generatePomFileForSnapshotPublication").configure {
             dependsOn(bundleTask)
@@ -183,8 +184,8 @@ class MavenPublishConventionPlugin : Plugin<Project> {
                     afterEvaluate {
                         artifact(tasks.named("bundleReleaseAar"))
                     }
-                    artifact(tasks.named("emptySourcesJar"))
-                    artifact(tasks.named("emptyJavadocJar"))
+                    artifact(tasks.named("sourcesJar"))
+                    artifact(tasks.named("javadocJar"))
 
                     configurePom(project)
                     configureDependencies(project)
@@ -198,8 +199,8 @@ class MavenPublishConventionPlugin : Plugin<Project> {
                     afterEvaluate {
                         artifact(tasks.named("bundleReleaseAar"))
                     }
-                    artifact(tasks.named("emptySourcesJar"))
-                    artifact(tasks.named("emptyJavadocJar"))
+                    artifact(tasks.named("sourcesJar"))
+                    artifact(tasks.named("javadocJar"))
 
                     configurePom(project)
                     configureDependencies(project)
