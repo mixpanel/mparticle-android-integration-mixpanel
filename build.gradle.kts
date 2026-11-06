@@ -31,10 +31,19 @@ android {
     }
 }
 
+// Newer Session Replay releases pull in AndroidX libraries that require compileSdk 35 and a
+// newer Android Gradle plugin. Session Replay is only on the unit test classpath, so skip the
+// AAR metadata check for unit tests rather than upgrading the kit's build.
+tasks.configureEach {
+    if (name.matches(Regex("check.*UnitTestAarMetadata"))) enabled = false
+}
+
 dependencies {
     api("com.mparticle:android-kit-base:5.78.5")
     api("com.mixpanel.android:mixpanel-android:8.4.0")
     compileOnly("com.mixpanel.android:mixpanel-android-session-replay:1.+")
+    // Dynamic so tests run against the latest Session Replay release
+    testImplementation("com.mixpanel.android:mixpanel-android-session-replay:1.+")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")

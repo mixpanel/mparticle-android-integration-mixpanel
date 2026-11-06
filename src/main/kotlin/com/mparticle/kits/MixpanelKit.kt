@@ -759,25 +759,23 @@ open class MixpanelKit : KitIntegration(),
             // Build autoMaskedViews set based on mask configuration
             val autoMaskedViews = buildAutoMaskedViewsSet(autoMaskedViewClass)
 
-            // Create MPSessionReplayConfig using data class constructor
-            // Constructor params: wifiOnly, flushInterval, autoStartRecording, recordingSessionsPercent, autoMaskedViews, enableLogging
-            val configConstructor = configClass.getConstructor(
-                Boolean::class.java,      // wifiOnly
-                Long::class.java,         // flushInterval
-                Boolean::class.java,      // autoStartRecording
-                Double::class.java,       // recordingSessionsPercent
-                Set::class.java,          // autoMaskedViews
-                Boolean::class.java       // enableLogging
-            )
-
-            val config = configConstructor.newInstance(
-                sessionReplayConfig.wifiOnly,
-                sessionReplayConfig.flushIntervalSeconds.toLong(),
-                sessionReplayConfig.autoStartRecording,
-                sessionReplayConfig.recordSessionsPercent,
-                autoMaskedViews,
-                sessionReplayConfig.enableLogging
-            )
+            // Create MPSessionReplayConfig with its no-arg constructor and set each option through
+            // its setter. The full constructor's parameter list grows whenever the SDK adds an
+            // option, so looking it up by signature breaks on newer SDKs (SDK-172). Options the
+            // kit doesn't set keep the SDK's defaults.
+            val config = configClass.getConstructor().newInstance()
+            configClass.getMethod("setWifiOnly", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.wifiOnly)
+            configClass.getMethod("setFlushInterval", Long::class.java)
+                .invoke(config, sessionReplayConfig.flushIntervalSeconds.toLong())
+            configClass.getMethod("setAutoStartRecording", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.autoStartRecording)
+            configClass.getMethod("setRecordingSessionsPercent", Double::class.java)
+                .invoke(config, sessionReplayConfig.recordSessionsPercent)
+            configClass.getMethod("setAutoMaskedViews", Set::class.java)
+                .invoke(config, autoMaskedViews)
+            configClass.getMethod("setEnableLogging", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.enableLogging)
 
             // Get the distinct ID from Mixpanel
             val distinctId = mixpanelInstance?.distinctId ?: ""
