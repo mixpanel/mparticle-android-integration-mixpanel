@@ -33,16 +33,67 @@ open class MixpanelKit : KitIntegration(),
     private var sessionReplayConfig: SessionReplayConfiguration = SessionReplayConfiguration()
 
     @Volatile
-    private var sessionReplayBridge: SessionReplayBridge? = null
+    private var _sessionReplayInstance: Any? = null
+
+    @Volatile
+    private var _sessionReplayClass: Class<*>? = null
 
     @Volatile
     private var wasManuallyStoppedBeforeOptOut: Boolean = false
 
+    private val sessionReplayInstanceLock = Any()
+
     /** Access to the underlying Session Replay SDK instance, if available. */
-    val sessionReplayInstance: Any? get() = withSessionReplay("resolve Session Replay instance", null) { it.instance }
+    val sessionReplayInstance: Any? get() = resolveSessionReplayInstance()
 
     /** Whether Session Replay is enabled and initialized. */
-    val isSessionReplayEnabled: Boolean get() = sessionReplayConfig.enabled && sessionReplayInstance != null
+    val isSessionReplayEnabled: Boolean get() = sessionReplayConfig.enabled && resolveSessionReplayInstance() != null
+
+    private fun resolveSessionReplayInstance(): Any? {
+        _sessionReplayInstance?.let { return it }
+        val srClass = _sessionReplayClass ?: return null
+        synchronized(sessionReplayInstanceLock) {
+            // Double-check after acquiring lock (another thread may have resolved)
+            _sessionReplayInstance?.let { return it }
+            return try {
+                val companionField = srClass.getField("Companion")
+                val companion = companionField.get(null)
+                val getInstanceMethod = companion.javaClass.getMethod("getInstance")
+                val instance = getInstanceMethod.invoke(companion)
+                if (instance != null) {
+                    _sessionReplayInstance = instance
+                    Log.d(LOG_TAG, "Session Replay instance resolved (async init complete)")
+                } else {
+                    Log.d(LOG_TAG, "Session Replay instance not yet available (getInstance() returned null)")
+                }
+                instance
+            } catch (e: NoSuchFieldException) {
+                Log.w(
+                    LOG_TAG,
+                    "Session Replay integration error: Companion field not found on ${srClass.name}. Disabling Session Replay.",
+                    e
+                )
+                _sessionReplayClass = null
+                null
+            } catch (e: NoSuchMethodException) {
+                Log.w(
+                    LOG_TAG,
+                    "Session Replay integration error: getInstance() method not found on ${srClass.name}. Disabling Session Replay.",
+                    e
+                )
+                _sessionReplayClass = null
+                null
+            } catch (e: Exception) {
+                Log.e(
+                    LOG_TAG,
+                    "Session Replay integration error while resolving instance. Disabling Session Replay.",
+                    e
+                )
+                _sessionReplayClass = null
+                null
+            }
+        }
+    }
 
     val isStarted: Boolean get() = _isStarted
 
@@ -66,8 +117,12 @@ open class MixpanelKit : KitIntegration(),
         sessionReplayConfig = config
     }
 
-    internal fun setSessionReplayBridge(bridge: SessionReplayBridge?) {
-        sessionReplayBridge = bridge
+    protected fun setSessionReplayInstance(instance: Any?) {
+        _sessionReplayInstance = instance
+    }
+
+    protected fun setSessionReplayClass(clazz: Class<*>?) {
+        _sessionReplayClass = clazz
     }
 
     protected fun setWasManuallyStoppedBeforeOptOut(value: Boolean) {
@@ -148,7 +203,8 @@ open class MixpanelKit : KitIntegration(),
 
             if (optedOut) {
                 // Check if recording was manually stopped before opt-out
-                if (sessionReplayInstance != null && !isSessionReplayRecording()) {
+                val srInstance = resolveSessionReplayInstance()
+                if (srInstance != null && !isSessionReplayRecording(srInstance)) {
                     wasManuallyStoppedBeforeOptOut = true
                 }
                 mixpanel.optOutTracking()
@@ -686,81 +742,153 @@ open class MixpanelKit : KitIntegration(),
 
     /**
      * Initialize Session Replay if enabled and the SDK is available.
-     * Session Replay is an optional dependency, so a missing or incompatible SDK surfaces as a
-     * [LinkageError] here and disables Session Replay instead of crashing.
+     * Uses reflection to avoid ClassNotFoundException when the optional dependency is not present.
      */
-    internal fun initializeSessionReplayIfEnabled(context: Context, token: String) {
+    private fun initializeSessionReplayIfEnabled(context: Context, token: String) {
         if (!sessionReplayConfig.enabled) {
             Log.d(LOG_TAG, "Session Replay is disabled")
             return
         }
 
         try {
+            // Check if Session Replay SDK is available
+            val sessionReplayClass = Class.forName("com.mixpanel.android.sessionreplay.MPSessionReplay")
+            val configClass = Class.forName("com.mixpanel.android.sessionreplay.models.MPSessionReplayConfig")
+            val autoMaskedViewClass = Class.forName("com.mixpanel.android.sessionreplay.sensitive_views.AutoMaskedView")
+
+            // Build autoMaskedViews set based on mask configuration
+            val autoMaskedViews = buildAutoMaskedViewsSet(autoMaskedViewClass)
+
+            // Create MPSessionReplayConfig with its no-arg constructor and set each option through
+            // its setter. The full constructor's parameter list grows whenever the SDK adds an
+            // option, so looking it up by signature breaks on newer SDKs (SDK-172). Options the
+            // kit doesn't set keep the SDK's defaults.
+            val config = configClass.getConstructor().newInstance()
+            configClass.getMethod("setWifiOnly", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.wifiOnly)
+            configClass.getMethod("setFlushInterval", Long::class.java)
+                .invoke(config, sessionReplayConfig.flushIntervalSeconds.toLong())
+            configClass.getMethod("setAutoStartRecording", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.autoStartRecording)
+            configClass.getMethod("setRecordingSessionsPercent", Double::class.java)
+                .invoke(config, sessionReplayConfig.recordSessionsPercent)
+            configClass.getMethod("setAutoMaskedViews", Set::class.java)
+                .invoke(config, autoMaskedViews)
+            configClass.getMethod("setEnableLogging", Boolean::class.java)
+                .invoke(config, sessionReplayConfig.enableLogging)
+
+            // Get the distinct ID from Mixpanel
             val distinctId = mixpanelInstance?.distinctId ?: ""
-            sessionReplayBridge = createSessionReplayBridge(context.applicationContext ?: context, token, distinctId)
-            Log.i(LOG_TAG, "Session Replay initialized")
-        } catch (e: NoClassDefFoundError) {
+
+            // Initialize Session Replay
+            val initializeMethod = sessionReplayClass.getMethod(
+                "initialize",
+                Context::class.java,
+                String::class.java,
+                String::class.java,
+                configClass
+            )
+
+            initializeMethod.invoke(null, context.applicationContext, token, distinctId, config)
+            _sessionReplayClass = sessionReplayClass
+            resolveSessionReplayInstance()
+
+            val instanceResolved = _sessionReplayInstance != null
+            val integrationDisabled = _sessionReplayClass == null && !instanceResolved
+            when {
+                instanceResolved -> {
+                    Log.i(LOG_TAG, "Session Replay initialized, instance resolved synchronously")
+                }
+                integrationDisabled -> {
+                    Log.w(LOG_TAG, "Session Replay initialization attempted, but integration was disabled due to reflection/API mismatch; instance will not be resolved lazily")
+                }
+                else -> {
+                    Log.i(LOG_TAG, "Session Replay initialized, instance not yet available (will resolve lazily if Session Replay completes async init)")
+                }
+            }
+
+        } catch (e: ClassNotFoundException) {
             Log.w(LOG_TAG, "Session Replay SDK not available. Add 'com.mixpanel.android:mixpanel-android-session-replay' dependency to enable.", e)
-        } catch (e: LinkageError) {
-            Log.e(LOG_TAG, "Session Replay SDK version is incompatible with this kit: ${e.message}", e)
+        } catch (e: NoSuchMethodException) {
+            Log.e(LOG_TAG, "Session Replay SDK API mismatch: ${e.message}", e)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to initialize Session Replay: ${e.message}", e)
+            _sessionReplayClass = null
+            _sessionReplayInstance = null
         }
     }
 
-    internal open fun createSessionReplayBridge(
-        context: Context,
-        token: String,
-        distinctId: String
-    ): SessionReplayBridge = MixpanelSessionReplayBridge.initialize(context, token, distinctId, sessionReplayConfig)
-
     /**
-     * Run [block] against the Session Replay bridge, returning [fallback] if Session Replay is
-     * unavailable or the call fails. A [LinkageError] means the SDK on the classpath is
-     * incompatible, so Session Replay is disabled for the rest of the session.
+     * Build autoMaskedViews set from boolean mask flags.
+     * Maps maskImages/maskText/maskWebViews to AutoMaskedView enum values.
      */
-    private inline fun <T> withSessionReplay(
-        action: String,
-        fallback: T,
-        block: (SessionReplayBridge) -> T
-    ): T {
-        val bridge = sessionReplayBridge ?: return fallback
-        return try {
-            block(bridge)
-        } catch (e: LinkageError) {
-            Log.e(LOG_TAG, "Session Replay SDK version is incompatible with this kit. Disabling Session Replay.", e)
-            sessionReplayBridge = null
-            fallback
-        } catch (e: Exception) {
-            Log.e(LOG_TAG, "Failed to $action: ${e.message}", e)
-            fallback
+    private fun buildAutoMaskedViewsSet(autoMaskedViewClass: Class<*>): Set<Any> {
+        val result = mutableSetOf<Any>()
+
+        // Get enum constants: Text, Image, Web
+        val enumConstants = autoMaskedViewClass.enumConstants as? Array<*> ?: return emptySet()
+
+        for (constant in enumConstants) {
+            val name = (constant as Enum<*>).name
+            val shouldInclude = when (name) {
+                "Text" -> sessionReplayConfig.maskText
+                "Image" -> sessionReplayConfig.maskImages
+                "Web" -> sessionReplayConfig.maskWebViews
+                else -> false
+            }
+            if (shouldInclude) {
+                result.add(constant)
+            }
         }
+
+        return result
     }
 
     /**
      * Sync identity with Session Replay.
      */
     private fun identifySessionReplay(distinctId: String) {
-        withSessionReplay("sync Session Replay identity", Unit) {
-            it.identify(distinctId)
+        val instance = resolveSessionReplayInstance() ?: return
+
+        try {
+            val sessionReplayClass = instance.javaClass
+            val identifyMethod = sessionReplayClass.getMethod("identify", String::class.java)
+            identifyMethod.invoke(instance, distinctId)
             Log.d(LOG_TAG, "Session Replay identity synced")
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to sync Session Replay identity: ${e.message}", e)
         }
     }
 
     /**
      * Check if Session Replay is currently recording.
+     * Uses reflection to avoid compile-time dependency.
      */
-    private fun isSessionReplayRecording(): Boolean =
-        withSessionReplay("check Session Replay recording state", false) { it.isRecording() }
+    private fun isSessionReplayRecording(resolvedInstance: Any? = null): Boolean {
+        val instance = resolvedInstance ?: resolveSessionReplayInstance() ?: return false
+        return try {
+            val method = instance.javaClass.getMethod("isRecording")
+            method.invoke(instance) as? Boolean ?: false
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to check Session Replay recording state: ${e.message}", e)
+            false
+        }
+    }
 
     /**
      * Start Session Replay recording.
      */
     fun startSessionReplayRecording() {
         if (!_isStarted) return
-        withSessionReplay("start Session Replay recording", Unit) {
-            it.startRecording(sessionReplayConfig.recordSessionsPercent)
+        val instance = resolveSessionReplayInstance() ?: return
+
+        try {
+            val sessionReplayClass = instance.javaClass
+            val startRecordingMethod = sessionReplayClass.getMethod("startRecording", Double::class.javaPrimitiveType)
+            startRecordingMethod.invoke(instance, sessionReplayConfig.recordSessionsPercent)
             Log.d(LOG_TAG, "Session Replay recording started")
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to start Session Replay recording: ${e.message}", e)
         }
     }
 
@@ -769,9 +897,15 @@ open class MixpanelKit : KitIntegration(),
      */
     fun stopSessionReplayRecording() {
         if (!_isStarted) return
-        withSessionReplay("stop Session Replay recording", Unit) {
-            it.stopRecording()
+        val instance = resolveSessionReplayInstance() ?: return
+
+        try {
+            val sessionReplayClass = instance.javaClass
+            val stopRecordingMethod = sessionReplayClass.getMethod("stopRecording")
+            stopRecordingMethod.invoke(instance)
             Log.d(LOG_TAG, "Session Replay recording stopped")
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to stop Session Replay recording: ${e.message}", e)
         }
     }
 
@@ -782,6 +916,15 @@ open class MixpanelKit : KitIntegration(),
      */
     fun getSessionReplayId(): String? {
         if (!_isStarted) return null
-        return withSessionReplay("get Session Replay ID", null) { it.getReplayId() }
+        val instance = resolveSessionReplayInstance() ?: return null
+
+        return try {
+            val sessionReplayClass = instance.javaClass
+            val getReplayIdMethod = sessionReplayClass.getMethod("getReplayId")
+            getReplayIdMethod.invoke(instance) as? String
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to get Session Replay ID: ${e.message}", e)
+            null
+        }
     }
 }

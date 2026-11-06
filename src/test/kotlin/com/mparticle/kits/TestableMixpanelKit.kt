@@ -18,22 +18,12 @@ class TestableMixpanelKit : MixpanelKit() {
         mockMixpanelAPI = mock
     }
 
-    /**
-     * Creates the Session Replay bridge during [onKitCreate]. Defaults to simulating an app
-     * without the Session Replay SDK on its classpath.
-     */
-    internal var sessionReplayBridgeFactory: () -> SessionReplayBridge = {
-        throw NoClassDefFoundError("com/mixpanel/android/sessionreplay/MPSessionReplay")
+    fun setTestSessionReplayInstance(instance: Any?) {
+        setSessionReplayInstance(instance)
     }
 
-    override fun createSessionReplayBridge(
-        context: Context,
-        token: String,
-        distinctId: String
-    ): SessionReplayBridge = sessionReplayBridgeFactory()
-
-    internal fun setTestSessionReplayBridge(bridge: SessionReplayBridge?) {
-        setSessionReplayBridge(bridge)
+    fun setTestSessionReplayClass(clazz: Class<*>?) {
+        setSessionReplayClass(clazz)
     }
 
     fun setTestWasManuallyStoppedBeforeOptOut(value: Boolean) {
@@ -66,7 +56,6 @@ class TestableMixpanelKit : MixpanelKit() {
             setMixpanelInstance(mockMixpanelAPI!!)
             clearStaleOptOutState()
             setStarted(true)
-            initializeSessionReplayIfEnabled(context, token)
             return emptyList()
         }
 
