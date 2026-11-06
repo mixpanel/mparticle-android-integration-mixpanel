@@ -24,6 +24,10 @@ jobs:
     
     - name: Setup Android SDK
       uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      with:
+        # The default also installs the legacy 'tools' package, which current
+        # cmdline-tools no longer provide.
+        packages: 'platform-tools'
     
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@6cfc8b8e8bb586cc164bef1c478c1eea3a4d6a19 # v3
@@ -59,6 +63,10 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      with:
+        # The default also installs the legacy 'tools' package, which current
+        # cmdline-tools no longer provide.
+        packages: 'platform-tools'
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@6cfc8b8e8bb586cc164bef1c478c1eea3a4d6a19 # v3
