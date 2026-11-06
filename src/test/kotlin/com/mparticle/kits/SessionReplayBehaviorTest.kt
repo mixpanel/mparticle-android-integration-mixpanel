@@ -4,9 +4,7 @@ import android.content.Context
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import com.mparticle.MParticle
 import com.mparticle.identity.MParticleUser
-import com.mparticle.kits.mocks.MockSessionReplay
-import com.mparticle.kits.mocks.MockSessionReplayNoGetInstance
-import org.junit.After
+import com.mixpanel.android.sessionreplay.MPSessionReplayInstance
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -15,7 +13,9 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyDouble
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
@@ -40,11 +40,6 @@ class SessionReplayBehaviorTest {
         mockPeople = mock(MixpanelAPI.People::class.java)
         `when`(mockMixpanel.people).thenReturn(mockPeople)
         `when`(mockMixpanel.distinctId).thenReturn("test-distinct-id")
-    }
-
-    @After
-    fun tearDown() {
-        MockSessionReplay.reset()
     }
 
     // SDK Absent Tests
@@ -259,103 +254,84 @@ class SessionReplayBehaviorTest {
         verify(mockMixpanel).identify("user-123")
     }
 
-    @Test
-    fun `resolveSessionReplayInstance returns instance via Companion getInstance`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
-
-        val resolved = kit.sessionReplayInstance
-        assertNotNull(resolved)
-        assertSame(mockSR, resolved)
-    }
+    // Bridge Tests
 
     @Test
-    fun `resolveSessionReplayInstance returns null when getInstance returns null`() {
-        initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+    fun `session replay instance comes from the bridge`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
-        assertNull(kit.sessionReplayInstance)
-        assertFalse(kit.isSessionReplayEnabled)
-    }
-
-    @Test
-    fun `resolveSessionReplayInstance caches instance on subsequent calls`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
-
-        val first = kit.sessionReplayInstance
-        val second = kit.sessionReplayInstance
-        assertNotNull(first)
-        assertSame(first, second)
-    }
-
-    @Test
-    fun `isSessionReplayEnabled returns true when instance resolves`() {
-        initializeKit(sessionReplayEnabled = true)
-        MockSessionReplay.setInstance(mock(MockSessionReplay::class.java))
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
-
+        assertSame(mockSR, kit.sessionReplayInstance)
         assertTrue(kit.isSessionReplayEnabled)
     }
 
     @Test
-    fun `resolveSessionReplayInstance returns null when class has no Companion field`() {
-        initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(String::class.java)
+    fun `session replay instance is null until SDK finishes async init`() {
+        var instance: MPSessionReplayInstance? = null
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { instance })
 
-        assertNull(kit.sessionReplayInstance)
-    }
-
-    @Test
-    fun `NoSuchFieldException disables further resolution attempts`() {
-        initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(String::class.java)
-
-        // First call triggers NoSuchFieldException and nulls _sessionReplayClass
-        assertNull(kit.sessionReplayInstance)
-        // Second call should still return null (permanently disabled)
         assertNull(kit.sessionReplayInstance)
         assertFalse(kit.isSessionReplayEnabled)
+
+        instance = mock(MPSessionReplayInstance::class.java)
+        assertSame(instance, kit.sessionReplayInstance)
+        assertTrue(kit.isSessionReplayEnabled)
     }
 
     @Test
-    fun `resolveSessionReplayInstance returns null when Companion has no getInstance method`() {
-        initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(MockSessionReplayNoGetInstance::class.java)
+    fun `bridge is not created when session replay is disabled`() {
+        var created = false
+        kit.sessionReplayBridgeFactory = {
+            created = true
+            MixpanelSessionReplayBridge { null }
+        }
+        initializeKit(sessionReplayEnabled = false)
 
+        assertFalse(created)
         assertNull(kit.sessionReplayInstance)
     }
 
     @Test
-    fun `NoSuchMethodException disables further resolution attempts`() {
+    fun `incompatible SDK at init disables session replay without crashing`() {
+        kit.sessionReplayBridgeFactory = {
+            throw NoSuchMethodError("MPSessionReplayConfig.<init>")
+        }
         initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(MockSessionReplayNoGetInstance::class.java)
 
-        // First call triggers NoSuchMethodException and nulls _sessionReplayClass
-        assertNull(kit.sessionReplayInstance)
-        // Second call should still return null (permanently disabled)
         assertNull(kit.sessionReplayInstance)
         assertFalse(kit.isSessionReplayEnabled)
+        kit.startSessionReplayRecording()
+        assertNull(kit.getSessionReplayId())
     }
 
     @Test
-    fun `resolveSessionReplayInstance returns null when sessionReplayClass is null`() {
-        initializeKit(sessionReplayEnabled = true)
-        kit.setTestSessionReplayClass(null)
+    fun `incompatible SDK at call time disables further session replay calls`() {
+        val bridge = mock(SessionReplayBridge::class.java)
+        `when`(bridge.instance).thenReturn(Any())
+        `when`(bridge.getReplayId()).thenThrow(NoSuchMethodError("getReplayId"))
+        initializeKit(sessionReplayEnabled = true, bridge = bridge)
 
+        assertNull(kit.getSessionReplayId())
+        // Bridge was dropped, so later calls no-op instead of hitting the SDK again
         assertNull(kit.sessionReplayInstance)
+        kit.startSessionReplayRecording()
+        verify(bridge, never()).startRecording(anyDouble())
     }
 
     @Test
-    fun `identity sync calls identify on resolved mock instance`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+    fun `exception from SDK call does not disable session replay`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
+        `when`(mockSR.getReplayId()).thenThrow(IllegalStateException("boom"))
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
+
+        assertNull(kit.getSessionReplayId())
+        assertSame(mockSR, kit.sessionReplayInstance)
+    }
+
+    @Test
+    fun `identity sync calls identify on session replay instance`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
         val mockUser = createMockUserWithCustomerId("user-999")
         kit.onIdentifyCompleted(mockUser, null)
@@ -365,47 +341,38 @@ class SessionReplayBehaviorTest {
     }
 
     @Test
-    fun `getSessionReplayId returns value from resolved mock instance`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
+    fun `getSessionReplayId returns value from session replay instance`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
         `when`(mockSR.getReplayId()).thenReturn("mock-replay-id")
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
-        val replayId = kit.getSessionReplayId()
+        assertEquals("mock-replay-id", kit.getSessionReplayId())
         verify(mockSR).getReplayId()
-        assertEquals("mock-replay-id", replayId)
     }
 
     @Test
-    fun `startRecording calls startRecording on resolved mock instance`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+    fun `startRecording calls startRecording on session replay instance`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
         kit.startSessionReplayRecording()
         verify(mockSR).startRecording(100.0)
     }
 
     @Test
-    fun `stopRecording calls stopRecording on resolved mock instance`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+    fun `stopRecording calls stopRecording on session replay instance`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
         kit.stopSessionReplayRecording()
         verify(mockSR).stopRecording()
     }
 
     @Test
-    fun `isRecording checked via resolved mock instance during opt out`() {
-        initializeKit(sessionReplayEnabled = true)
-        val mockSR = mock(MockSessionReplay::class.java)
+    fun `isRecording checked on session replay instance during opt out`() {
+        val mockSR = mock(MPSessionReplayInstance::class.java)
         `when`(mockSR.isRecording()).thenReturn(false)
-        MockSessionReplay.setInstance(mockSR)
-        kit.setTestSessionReplayClass(MockSessionReplay::class.java)
+        initializeKit(sessionReplayEnabled = true, bridge = MixpanelSessionReplayBridge { mockSR })
 
         kit.setOptOut(true)
         verify(mockSR).isRecording()
@@ -417,8 +384,10 @@ class SessionReplayBehaviorTest {
     private fun initializeKit(
         token: String = "test-token",
         sessionReplayEnabled: Boolean = false,
-        autoStartRecording: Boolean = true
+        autoStartRecording: Boolean = true,
+        bridge: SessionReplayBridge? = null
     ) {
+        if (bridge != null) kit.sessionReplayBridgeFactory = { bridge }
         kit.setMockMixpanelAPI(mockMixpanel)
         val settings = mutableMapOf(
             KEY_TOKEN to token,

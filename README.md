@@ -18,11 +18,13 @@ dependencies {
     implementation 'com.mixpanel.android:mparticle-android-integration-mixpanel:1.+'
 
     // Optional: Add Session Replay SDK for session recording
-    implementation 'com.mixpanel.android:mixpanel-android-session-replay:1.+'
+    implementation 'com.mixpanel.android:mixpanel-android-session-replay:[1.0.6, 2.0)'
 }
 ```
 
 The kit includes the Mixpanel Android SDK as a transitive dependency. The Session Replay SDK is optional and only required if you enable Session Replay.
+
+The kit supports Session Replay `1.0.6` and later `1.x` releases. Kit version `1.0.0` only works with Session Replay `1.0.6` or earlier; upgrade the kit to use newer Session Replay releases.
 
 ## Configuration
 
