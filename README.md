@@ -5,7 +5,7 @@
 
 # Latest Version
 
-##### _April 22, 2026_ - [v1.0.0](https://github.com/mixpanel/mparticle-android-integration-mixpanel/releases/tag/v1.0.0)
+##### _November 17, 2026_ - [v1.1.0](https://github.com/mixpanel/mparticle-android-integration-mixpanel/releases/tag/v1.1.0)
 
 This repository contains the Mixpanel integration for the [mParticle Android SDK](https://github.com/mParticle/mparticle-android-sdk).
 
